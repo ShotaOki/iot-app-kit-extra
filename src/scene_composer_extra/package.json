@@ -1,0 +1,39 @@
+{
+  "name": "@iak-extra/scene-composer-extra",
+  "version": "0.1.0",
+  "description": "Extra Libraries for IoT App Kit Scene Composer",
+  "type": "module",
+  "source": "./src/index.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "./dist/*"
+  ],
+  "author": "shotaoki",
+  "license": "MIT",
+  "dependencies": {
+    "typescript": "^5.1.6",
+    "@iot-app-kit/scene-composer": "^3.3.0",
+    "@react-three/drei": "^9.44.1",
+    "@react-three/fiber": "^8.13.3",
+    "jsx-runtime": "^1.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "three": "^0.139.0",
+    "three-mesh-bvh": "^0.5.15",
+    "three-mesh-ui": "^6.5.4",
+    "three-stdlib": "^2.18.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.35",
+    "@types/react": "^18.2.11",
+    "@types/react-dom": "^18.2.4",
+    "@types/three": "^0.139.0"
+  }
+}

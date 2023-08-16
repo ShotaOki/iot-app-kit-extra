@@ -4,8 +4,6 @@
 
 This library extends the AWS IoT App Kit's Scene Composer.
 
-![](./images/mmd-image.gif)
-
 - Replaces TwinMaker tag objects to Three.js object (e.g. MMD, buttons, text, etc.)
 - Triggers a color change in TwinMaker tags to change the motion of the MMD and the content of the text.
 
