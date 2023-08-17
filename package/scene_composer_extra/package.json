@@ -2,13 +2,13 @@
   "name": "@iak-extra/scene-composer-extra",
   "version": "0.1.2",
   "description": "Extra Libraries for IoT App Kit Scene Composer",
-  "type": "module",
-  "source": "./src/index.ts",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/es/index.js",
+  "types": "./dist/es/index.d.ts",
   "scripts": {
-    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "files": [
