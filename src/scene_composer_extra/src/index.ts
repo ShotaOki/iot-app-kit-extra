@@ -9,4 +9,4 @@ export {
   findRootScene,
 } from "./utility/SceneUtility";
 export { stringToDefaultAnchorStatus } from "./utility/TwinMakerTagNames";
-export { FontData, FontDataParameter } from "./types/MeshUiFont";
+export { FontData, type FontDataParameter } from "./types/MeshUiFont";
