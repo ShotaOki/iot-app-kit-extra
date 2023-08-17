@@ -55,7 +55,6 @@ import {
   SceneController,
   useSceneController,
 } from "@iak-extra/scene-composer-extra";
-import * as THREE from "three";
 
 function App() {
   // TwinMakerのシーンを読み込む
@@ -69,7 +68,7 @@ function App() {
         /** TwinMakerのタグを上書きする */
         overrideTags(rootScene) {
           return {
-            // TwinMakerのタグをボタンに置き換える
+            // TwinMakerのタグをテキストに置き換える
             "any-text-tag-name": (ref, anchor) =>
               replaceTag.toText(ref, anchor)?.create({
                 rootScene,
@@ -140,7 +139,8 @@ npm install ${ルートディレクトリ}/package/scene_composer_extra
 以下のコマンドで、NPM にプッシュします。
 
 ```bash
-# TBD
+# package/scene_composer_extraで実施する
+npm publish ./
 ```
 
 ## ライセンス情報

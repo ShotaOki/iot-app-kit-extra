@@ -55,7 +55,6 @@ import {
   SceneController,
   useSceneController,
 } from "@iak-extra/scene-composer-extra";
-import * as THREE from "three";
 
 function App() {
   // Read TwinMaker Scene
@@ -140,7 +139,8 @@ npm install ${ProjectRoot}/package/scene_composer_extra
 The following command pushes to NPM.
 
 ```bash
-# TBD
+# Execute Directory :: package/scene_composer_extra
+npm publish ./
 ```
 
 ## License
