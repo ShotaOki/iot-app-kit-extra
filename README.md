@@ -4,6 +4,10 @@
 
 This library extends the AWS IoT App Kit's Scene Composer.
 
+![](./images/tag-image.png)
+
+<div style="text-align:center; font-weight:bold">Tag replace to MMD</div>
+
 ![](./images/mmd-image.gif)
 
 - Replaces TwinMaker tag objects to Three.js object (e.g. MMD, buttons, text, etc.)
@@ -43,6 +47,8 @@ npm install @iak-extra/scene-composer-extra
 Create tags in TwinMaker in advance.
 
 You can name the tag anything you like. For example, you can name it "any-text-tag-name".
+
+![](./images/named-tag.png)
 
 ### Use it
 

@@ -4,6 +4,10 @@
 
 このライブラリは、AWS IoT App Kit の SceneComposer を拡張します。
 
+![](./images/tag-image.png)
+
+<div style="text-align:center; font-weight:bold">↓ タグをMMDモデルに置き換えます ↓</div>
+
 ![](./images/mmd-image.gif)
 
 - TwinMaker のタグオブジェクトを、TwinMaker で本来表示しないオブジェクト（MMD、ボタン、テキストなど）に置き換えます
@@ -43,6 +47,8 @@ npm install @iak-extra/scene-composer-extra
 TwinMaker にあらかじめタグを作成しておきます。
 
 タグ名は好きな名前をつけます。たとえば"any-text-tag-name"の名前を付けます。
+
+![](./images/named-tag.png)
 
 ### 利用する
 
