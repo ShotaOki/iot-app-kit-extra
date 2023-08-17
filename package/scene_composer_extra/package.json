@@ -1,6 +1,6 @@
 {
   "name": "@iak-extra/scene-composer-extra",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Extra Libraries for IoT App Kit Scene Composer",
   "type": "module",
   "source": "./src/index.ts",
@@ -12,7 +12,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "files": [
-    "./dist/*"
+    "./dist/*",
+    "./dist/**"
   ],
   "author": "shotaoki",
   "license": "MIT",
