@@ -1,6 +1,6 @@
 ---
 title: Design Draft
-author: Tao He
+author: Shota Oki
 date: 2022-02-06
 category: Jekyll
 layout: post

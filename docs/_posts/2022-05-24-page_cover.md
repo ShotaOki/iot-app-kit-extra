@@ -1,22 +1,11 @@
 ---
-title: Page with cover image
-author: Tao He
-date: 2022-05-24
+title: Load Button
+author: Shota Oki
+date: 2023-08-20
 category: Jekyll
 layout: post
-cover: https://sighingnow.github.io/jekyll-gitbook/assets/dinosaur.gif
 ---
 
-The jekyll-gitbook theme supports adding a cover image to a specific page by adding
-a `cover` field to the page metadata:
+## タグからボタンへの置き換え
 
-```diff
-  ---
-  title: Page with cover image
-  author: Tao He
-  date: 2022-05-24
-  category: Jekyll
-  layout: post
-+ cover: /assets/jekyll-gitbook/dinosaur.gif
-  ---
-```
+タグからボタンを読み込む方法を説明します
