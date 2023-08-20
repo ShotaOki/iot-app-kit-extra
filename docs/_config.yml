@@ -1,3 +1,8 @@
 remote_theme: sighingnow/jekyll-gitbook
 plugins:
   - jekyll-remote-theme # add this line to the plugins list if you already have one
+
+toc:
+  enabled: true
+  h_min: 1
+  h_max: 3
