@@ -1,6 +1,17 @@
 import { IAnchorComponent } from "@iot-app-kit/scene-composer";
-import { Vector3, Euler } from "three/src/Three";
+import { Vector3, Euler, Scene, Object3D } from "three/src/Three";
 import { AnimationParameter, SystemLoadingStatus } from "../types/DataType";
+import { degToRad } from "three/src/math/MathUtils";
+
+/** モデルの共通パラメータ */
+export interface ModelParameterBase {
+  // モデルを配置するルートシーン
+  rootScene: Scene;
+  // モデルの表示サイズ
+  scale?: number;
+  // モデルの表示アングル(ヨー方向、単位はDegree)
+  angle?: number;
+}
 
 export class ExtraObjectWrapper {
   // 表示位置
@@ -33,6 +44,32 @@ export class ExtraObjectWrapper {
   /** 読み込みの完了フラグ */
   get isLoaded() {
     return this._flagLoaded;
+  }
+
+  /**
+   * TwinMakerの表示データを参照する
+   *
+   * @param model 適用先のモデル
+   * @param parameter プログラムで設定されたパラメータ
+   */
+  protected applyAttitude(model: Object3D, parameter: ModelParameterBase) {
+    // 位置情報、大きさ、回転角度をTwinMakerのタグに合わせる
+    model.position.copy(this._position);
+    model.rotation.copy(this._rotate);
+    if (parameter.angle !== undefined) {
+      // 角度の指定があれば反映する
+      model.rotation.set(
+        model.rotation.x,
+        degToRad(parameter.angle),
+        model.rotation.z
+      );
+    }
+    if (parameter.scale !== undefined) {
+      // スケールの指定があれば反映する
+      model.scale.set(parameter.scale, parameter.scale, parameter.scale);
+    } else {
+      model.scale.copy(this._scale);
+    }
   }
 
   /** アニメーションループ */

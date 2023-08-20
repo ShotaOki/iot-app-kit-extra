@@ -1,9 +1,12 @@
-import { ExtraObjectWrapper } from "../ExtraObjectWrapper";
+import {
+  ExtraObjectWrapper,
+  type ModelParameterBase,
+} from "../ExtraObjectWrapper";
 import ThreeMeshUI from "three-mesh-ui";
 import { degToRad } from "three/src/math/MathUtils";
 import { AnimationParameter } from "../../types/DataType";
 import { getState } from "../../utility/SceneUtility";
-import { Scene, Raycaster, Color, Camera } from "three/src/Three";
+import { Raycaster, Color, Camera } from "three/src/Three";
 import { FontData } from "../../types/MeshUiFont";
 
 export interface MeshUiButtonColor {
@@ -11,11 +14,7 @@ export interface MeshUiButtonColor {
   fontColor: Color;
 }
 
-export interface MeshUiButtonParameter {
-  // モデルを配置するルートシーン
-  rootScene: Scene;
-  // モーションの表示アングル(ヨー方向、単位はDegree)
-  angle?: number;
+export interface MeshUiButtonParameter extends ModelParameterBase {
   // テキスト
   content: string;
   // 状態ごとの表示スタイル
@@ -64,9 +63,8 @@ export class MeshUiButtonWrapper extends ExtraObjectWrapper {
     });
 
     /** 位置を元のタグの位置に合わせる */
-    container.position.copy(that._position);
-    container.rotation.copy(that._rotate);
-    container.rotation.y = degToRad(parameter.angle ?? 0);
+    this.applyAttitude(container, parameter);
+    /** シーンに配置する */
     parameter.rootScene.add(container);
 
     /** ボタンを作成する */

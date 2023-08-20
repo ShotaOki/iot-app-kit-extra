@@ -1,5 +1,8 @@
-import { ExtraObjectWrapper } from "../ExtraObjectWrapper";
-import { Color, Scene } from "three/src/Three";
+import {
+  ExtraObjectWrapper,
+  type ModelParameterBase,
+} from "../ExtraObjectWrapper";
+import { Color } from "three/src/Three";
 import ThreeMeshUI from "three-mesh-ui";
 import { degToRad } from "three/src/math/MathUtils";
 import { AnimationParameter } from "../../types/DataType";
@@ -10,11 +13,7 @@ export interface MeshUiButtonColor {
   fontColor: Color;
 }
 
-export interface MeshUiTextParameter {
-  // モデルを配置するルートシーン
-  rootScene: Scene;
-  // モーションの表示アングル(ヨー方向、単位はDegree)
-  angle?: number;
+export interface MeshUiTextParameter extends ModelParameterBase {
   // テキスト
   content: string;
   // フォントデータ
@@ -52,9 +51,8 @@ export class MeshUiTextWrapper extends ExtraObjectWrapper {
     });
 
     /** 位置を元のタグの位置に合わせる */
-    container.position.copy(that._position);
-    container.rotation.copy(that._rotate);
-    container.rotation.y = degToRad(parameter.angle ?? 0);
+    this.applyAttitude(container, parameter);
+    /** 画面に配置する */
     parameter.rootScene.add(container);
 
     /** テキストを作成する */

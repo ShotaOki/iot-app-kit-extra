@@ -17,6 +17,10 @@ IoT App Kit に強く依存します。
 
 https://github.com/awslabs/iot-app-kit
 
+サンプル URL はこちらです
+
+https://pub-5e7ce27e493044a6ad7b1d927d05320c.r2.dev/index.html
+
 ## コンセプト
 
 TwinMaker が実装しない範囲のことを簡単に実現する
@@ -42,7 +46,7 @@ NPM でインストールすることができます
 npm install @iak-extra/scene-composer-extra
 ```
 
-### Create Tag
+### タグを用意する
 
 TwinMaker にあらかじめタグを作成しておきます。
 

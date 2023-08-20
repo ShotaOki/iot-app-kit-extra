@@ -8,6 +8,7 @@ import { SearchTagsCallback } from "../types/DataType";
 import { MeshUiButtonWrapper } from "../objects/three-mesh-ui/MeshUiButtonWrapper";
 import { MeshUiTextWrapper } from "../objects/three-mesh-ui/MeshUiTextWrapper";
 import { Object3D, Event } from "three/src/Three";
+import { GLTFModelWrapper } from "../objects/model/GLTFModelWrapper";
 
 /**
  * タグを検索する
@@ -91,6 +92,27 @@ export class ReplaceTag {
     if (tag) {
       tag.visible = false;
       return new MMDModelWrapper(tag.position, tag.rotation, tag.scale, anchor);
+    }
+    return undefined;
+  }
+
+  /**
+   * TwinMakerのタグオブジェクトをGLTF, GLBに置き換える
+   *
+   * @param ref タグオブジェクトのRef ID
+   * @param anchor タグオブジェクトのアンカー情報(位置、色、アイコン情報などが入っている)
+   * @returns GLTF, GLBの管理クラス
+   */
+  toGLTF(ref: string, anchor: IAnchorComponent) {
+    const tag = this._getObject3DBySceneNodeRef(ref);
+    if (tag) {
+      tag.visible = false;
+      return new GLTFModelWrapper(
+        tag.position,
+        tag.rotation,
+        tag.scale,
+        anchor
+      );
     }
     return undefined;
   }

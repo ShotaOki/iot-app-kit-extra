@@ -10,3 +10,4 @@ export {
 } from "./utility/SceneUtility";
 export { stringToDefaultAnchorStatus } from "./utility/TwinMakerTagNames";
 export { FontData, type FontDataParameter } from "./types/MeshUiFont";
+export { DirectSceneLoader } from "./utility/DirectSceneLoader";

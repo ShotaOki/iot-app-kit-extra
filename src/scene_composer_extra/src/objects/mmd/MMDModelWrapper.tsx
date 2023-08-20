@@ -1,4 +1,7 @@
-import { ExtraObjectWrapper } from "../ExtraObjectWrapper";
+import {
+  ExtraObjectWrapper,
+  type ModelParameterBase,
+} from "../ExtraObjectWrapper";
 import {
   Scene,
   BufferGeometry,
@@ -12,13 +15,7 @@ import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader";
 import { AnimationParameter, SystemLoadingStatus } from "../../types/DataType";
 import { degToRad } from "three/src/math/MathUtils";
 
-export interface MMDModelParameter {
-  // モデルを配置するルートシーン
-  rootScene: Scene;
-  // モーションの表示サイズ
-  scale?: number;
-  // モーションの表示アングル(ヨー方向、単位はDegree)
-  angle?: number;
+export interface MMDModelParameter extends ModelParameterBase {
   // MMDモデルのファイルパス
   pmxPath: string;
   // モーションの読み込みリスト, モーション名: ファイルパス
@@ -61,22 +58,7 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
     /** 非同期でMMDモデルを取得する */
     loader.loadAsync(parameter.pmxPath).then((mesh) => {
       // 位置情報、大きさ、回転角度をTwinMakerのタグに合わせる
-      mesh.position.copy(this._position);
-      mesh.rotation.copy(this._rotate);
-      if (parameter.angle !== undefined) {
-        // 角度の指定があれば反映する
-        mesh.rotation.set(
-          mesh.rotation.x,
-          degToRad(parameter.angle),
-          mesh.rotation.z
-        );
-      }
-      if (parameter.scale !== undefined) {
-        // スケールの指定があれば反映する
-        mesh.scale.set(parameter.scale, parameter.scale, parameter.scale);
-      } else {
-        mesh.scale.copy(this._scale);
-      }
+      this.applyAttitude(mesh, parameter);
       // 影を表示する
       mesh.castShadow = true;
       mesh.receiveShadow = true;
