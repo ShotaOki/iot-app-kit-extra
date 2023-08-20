@@ -21,6 +21,10 @@ https://github.com/awslabs/iot-app-kit
 
 https://pub-5e7ce27e493044a6ad7b1d927d05320c.r2.dev/index.html
 
+## ドキュメント
+
+https://shotaoki.github.io/iot-app-kit-extra/
+
 ## コンセプト
 
 TwinMaker が実装しない範囲のことを簡単に実現する
