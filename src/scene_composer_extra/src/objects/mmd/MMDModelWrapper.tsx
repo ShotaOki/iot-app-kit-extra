@@ -11,6 +11,7 @@ import {
   Clock,
 } from "three/src/Three";
 import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader";
+import { CCDIKSolver } from "three/examples/jsm/animation/CCDIKSolver";
 import { AnimationParameter, SystemLoadingStatus } from "../../types/DataType";
 
 export interface MMDModelParameter extends ModelParameterBase {
@@ -39,6 +40,8 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
   private _useMotionList?: { [key: string]: AnimationClip };
   // タイマーループ
   private _clock?: Clock;
+  // IKのリゾルバ
+  private _ikResolver?: CCDIKSolver;
 
   /**
    * 初期化する
@@ -100,6 +103,14 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
           results.forEach((motion, index) => {
             useMotionList[motionKeyList[index]] = motion as AnimationClip;
           });
+          try {
+            this._ikResolver = new CCDIKSolver(
+              mesh,
+              mesh.geometry.userData.MMD.iks
+            );
+          } catch (_) {
+            this._ikResolver = undefined;
+          }
           this._flagLoaded = true;
           this._useMotionList = useMotionList;
         });
@@ -153,6 +164,9 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
 
   /** アニメーションループ */
   executeAnimationLoop(parameter: AnimationParameter) {
+    if (this._ikResolver) {
+      this._ikResolver.update();
+    }
     // アニメーションの状態を更新
     if (this._clock) {
       const delta = this._clock.getDelta();
