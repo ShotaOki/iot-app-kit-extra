@@ -1,10 +1,9 @@
-import { IAnchorComponent } from "@iot-app-kit/scene-composer";
 import { ExtraObjectWrapper } from "../objects/ExtraObjectWrapper";
 import { Vector2, Raycaster } from "three/src/Three";
+import { ReplaceTag } from "../controllers/TagController";
 
 export type SearchTagsCallback = (
-  ref: string,
-  anchor: IAnchorComponent
+  replaceTag: ReplaceTag
 ) => ExtraObjectWrapper | undefined;
 
 export type OverrideTagsParameter = { [key: string]: SearchTagsCallback };

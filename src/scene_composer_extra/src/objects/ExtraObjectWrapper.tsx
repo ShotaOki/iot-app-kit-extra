@@ -5,8 +5,6 @@ import { degToRad } from "three/src/math/MathUtils";
 
 /** モデルの共通パラメータ */
 export interface ModelParameterBase {
-  // モデルを配置するルートシーン
-  rootScene: Scene;
   // モデルの表示サイズ
   scale?: number;
   // モデルの表示アングル(ヨー方向、単位はDegree)
@@ -26,13 +24,17 @@ export class ExtraObjectWrapper {
   protected _state: string | number;
   // 読み込み完了フラグ
   protected _flagLoaded: boolean;
+  // ルートシーン
+  protected _rootScene;
 
   constructor(
+    rootScene: Scene,
     position: Vector3,
     rotate: Euler,
     scale: Vector3,
     anchor: IAnchorComponent
   ) {
+    this._rootScene = rootScene;
     this._position = position;
     this._rotate = rotate;
     this._scale = scale;
@@ -95,12 +97,12 @@ export class ExtraObjectWrapper {
     }
     // 状態を更新する
     this._state = newState;
-    this.onChangeState(newState);
+    this.receivedChangeState(newState);
   }
 
   /**
    * 子クラスで実装: イベント通知関数
    * @param newState 次の状態
    */
-  protected onChangeState(newState: string | number) {}
+  protected receivedChangeState(newState: string | number) {}
 }

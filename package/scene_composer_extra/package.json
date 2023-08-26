@@ -1,6 +1,6 @@
 {
   "name": "@iak-extra/scene-composer-extra",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Extra Libraries for IoT App Kit Scene Composer",
   "publishConfig": {
     "access": "public"

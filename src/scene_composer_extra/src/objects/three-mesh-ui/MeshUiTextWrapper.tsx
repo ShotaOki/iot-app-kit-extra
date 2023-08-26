@@ -4,7 +4,6 @@ import {
 } from "../ExtraObjectWrapper";
 import { Color } from "three/src/Three";
 import ThreeMeshUI from "three-mesh-ui";
-import { degToRad } from "three/src/math/MathUtils";
 import { AnimationParameter } from "../../types/DataType";
 import { FontData } from "../../types/MeshUiFont";
 
@@ -53,7 +52,7 @@ export class MeshUiTextWrapper extends ExtraObjectWrapper {
     /** 位置を元のタグの位置に合わせる */
     this.applyAttitude(container, parameter);
     /** 画面に配置する */
-    parameter.rootScene.add(container);
+    this._rootScene.add(container);
 
     /** テキストを作成する */
     const text = new ThreeMeshUI.Text({ content: parameter.content });

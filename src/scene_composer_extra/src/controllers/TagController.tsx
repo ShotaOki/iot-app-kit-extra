@@ -7,7 +7,7 @@ import { MMDModelWrapper } from "../objects/mmd/MMDModelWrapper";
 import { SearchTagsCallback } from "../types/DataType";
 import { MeshUiButtonWrapper } from "../objects/three-mesh-ui/MeshUiButtonWrapper";
 import { MeshUiTextWrapper } from "../objects/three-mesh-ui/MeshUiTextWrapper";
-import { Object3D, Event } from "three/src/Three";
+import { Object3D, Event, Scene } from "three/src/Three";
 import { GLTFModelWrapper } from "../objects/model/GLTFModelWrapper";
 
 /**
@@ -19,6 +19,8 @@ import { GLTFModelWrapper } from "../objects/model/GLTFModelWrapper";
  * @returns ExtraObjectWrapperのインスタンス
  */
 export function searchTag(
+  rootScene: Scene,
+  context: ReplaceContext,
   nodeMap: Record<string, ISceneNodeInternal>,
   requiredName: string,
   callback: SearchTagsCallback
@@ -28,7 +30,7 @@ export function searchTag(
     const node = nodeMap[ref];
     // タグ名が一致するのなら処理をする
     if (node.name === requiredName) {
-      return executeIfNodeIsTag(ref, node, callback);
+      return executeIfNodeIsTag(rootScene, context, ref, node, callback);
     }
   }
   return undefined;
@@ -43,6 +45,8 @@ export function searchTag(
  * @returns ExtraObjectWrapperのインスタンス
  */
 function executeIfNodeIsTag(
+  rootScene: Scene,
+  context: ReplaceContext,
   ref: string,
   node: ISceneNodeInternal,
   callback: SearchTagsCallback
@@ -54,15 +58,17 @@ function executeIfNodeIsTag(
     // タグのコンポーネントには、タグ情報、オーバレイ情報などがあるため、タグ情報だけをフィルタして返す
     for (let component of node.components) {
       if (component.type === KnownComponentType.Tag) {
-        // タグの詳細情報を渡す
-        return callback(ref, component as IAnchorComponent);
+        // タグの置換情報を渡す
+        return callback(
+          context.replaceFromTag(rootScene, ref, component as IAnchorComponent)
+        );
       }
     }
   }
   return undefined;
 }
 
-export class ReplaceTag {
+export class ReplaceContext {
   // Objectを参照する関数
   private _getObject3DBySceneNodeRef: (
     ref: string | undefined
@@ -80,6 +86,32 @@ export class ReplaceTag {
     this._getObject3DBySceneNodeRef = getObject3DBySceneNodeRef;
   }
 
+  /** タグから別のオブジェクトに変換する */
+  replaceFromTag(rootScene: Scene, ref: string, anchor: IAnchorComponent) {
+    const tag = this._getObject3DBySceneNodeRef(ref);
+    return new ReplaceTag(rootScene, anchor, tag);
+  }
+}
+
+export class ReplaceTag {
+  _rootScene: Scene;
+  _anchor: IAnchorComponent;
+  _tag?: Object3D<Event>;
+
+  /**
+   * @param ref タグオブジェクトのRef ID
+   * @param anchor タグオブジェクトのアンカー情報(位置、色、アイコン情報などが入っている)
+   */
+  constructor(
+    rootScene: Scene,
+    anchor: IAnchorComponent,
+    tag?: Object3D<Event>
+  ) {
+    this._rootScene = rootScene;
+    this._anchor = anchor;
+    this._tag = tag;
+  }
+
   /**
    * TwinMakerのタグオブジェクトをMMDに置き換える
    *
@@ -87,11 +119,17 @@ export class ReplaceTag {
    * @param anchor タグオブジェクトのアンカー情報(位置、色、アイコン情報などが入っている)
    * @returns MMDの管理クラス
    */
-  toMMD(ref: string, anchor: IAnchorComponent) {
-    const tag = this._getObject3DBySceneNodeRef(ref);
+  get toMMD() {
+    const tag = this._tag;
     if (tag) {
       tag.visible = false;
-      return new MMDModelWrapper(tag.position, tag.rotation, tag.scale, anchor);
+      return new MMDModelWrapper(
+        this._rootScene,
+        tag.position,
+        tag.rotation,
+        tag.scale,
+        this._anchor
+      );
     }
     return undefined;
   }
@@ -99,19 +137,18 @@ export class ReplaceTag {
   /**
    * TwinMakerのタグオブジェクトをGLTF, GLBに置き換える
    *
-   * @param ref タグオブジェクトのRef ID
-   * @param anchor タグオブジェクトのアンカー情報(位置、色、アイコン情報などが入っている)
    * @returns GLTF, GLBの管理クラス
    */
-  toGLTF(ref: string, anchor: IAnchorComponent) {
-    const tag = this._getObject3DBySceneNodeRef(ref);
+  get toGLTF() {
+    const tag = this._tag;
     if (tag) {
       tag.visible = false;
       return new GLTFModelWrapper(
+        this._rootScene,
         tag.position,
         tag.rotation,
         tag.scale,
-        anchor
+        this._anchor
       );
     }
     return undefined;
@@ -120,19 +157,18 @@ export class ReplaceTag {
   /**
    * TwinMakerのタグオブジェクトをボタンに置き換える
    *
-   * @param ref タグオブジェクトのRef ID
-   * @param anchor タグオブジェクトのアンカー情報(位置、色、アイコン情報などが入っている)
    * @returns MMDの管理クラス
    */
-  toButton(ref: string, anchor: IAnchorComponent) {
-    const tag = this._getObject3DBySceneNodeRef(ref);
+  get toButton() {
+    const tag = this._tag;
     if (tag) {
       tag.visible = false;
       return new MeshUiButtonWrapper(
+        this._rootScene,
         tag.position,
         tag.rotation,
         tag.scale,
-        anchor
+        this._anchor
       );
     }
     return undefined;
@@ -141,19 +177,18 @@ export class ReplaceTag {
   /**
    * TwinMakerのタグオブジェクトをテキストに置き換える
    *
-   * @param ref タグオブジェクトのRef ID
-   * @param anchor タグオブジェクトのアンカー情報(位置、色、アイコン情報などが入っている)
    * @returns MMDの管理クラス
    */
-  toText(ref: string, anchor: IAnchorComponent) {
-    const tag = this._getObject3DBySceneNodeRef(ref);
+  get toText() {
+    const tag = this._tag;
     if (tag) {
       tag.visible = false;
       return new MeshUiTextWrapper(
+        this._rootScene,
         tag.position,
         tag.rotation,
         tag.scale,
-        anchor
+        this._anchor
       );
     }
     return undefined;

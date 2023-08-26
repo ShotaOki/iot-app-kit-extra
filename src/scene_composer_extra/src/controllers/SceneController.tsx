@@ -23,7 +23,7 @@ import {
   dataBindingValuesProvider,
   ruleEvaluator,
 } from "@iot-app-kit/scene-composer/dist/src/utils/dataBindingUtils";
-import { searchTag } from "./TagController";
+import { ReplaceContext, searchTag } from "./TagController";
 import { SystemLoadingStatus } from "../types/DataType";
 import ThreeMeshUI from "three-mesh-ui";
 
@@ -35,6 +35,8 @@ export enum SceneControllerState {
 export class SceneController {
   // コンポーザーID
   private _composerId: string;
+  // コンテキスト
+  private _context: ReplaceContext;
   // シーンの更新通知関数
   private _interface: ISceneFieldInterface;
   // Tagを置き換えたあとのオブジェクト管理インスタンス
@@ -46,8 +48,13 @@ export class SceneController {
   // 選択状態
   private _selectState: boolean;
 
-  constructor(composeId: string, sceneInterface: ISceneFieldInterface) {
+  constructor(
+    composeId: string,
+    context: ReplaceContext,
+    sceneInterface: ISceneFieldInterface
+  ) {
     this._composerId = composeId;
+    this._context = context;
     this._interface = sceneInterface;
     this._objects = {};
     this._raycaster = new Raycaster();
@@ -163,11 +170,17 @@ export class SceneController {
         // シーンの更新通知を実行する
         this.onUpdateScene(state, rootScene as Scene);
         // シーンコントローラの更新通知イベントを実行: タグを上書きする
-        const overrides = this._interface.overrideTags(rootScene as Scene);
+        const overrides = this._interface.overrideTags;
         // 上書き対象のオブジェクトをさらう
         for (let tag of Object.keys(overrides)) {
           // 上書きを実行、成功すれば_objects変数に保持する
-          const wrapper = searchTag(nodeMap, tag, overrides[tag]);
+          const wrapper = searchTag(
+            rootScene,
+            this._context,
+            nodeMap,
+            tag,
+            overrides[tag]
+          );
           if (wrapper) {
             this._objects[tag] = wrapper;
           }

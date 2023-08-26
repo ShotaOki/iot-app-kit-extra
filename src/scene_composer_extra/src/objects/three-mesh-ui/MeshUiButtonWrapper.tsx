@@ -3,7 +3,6 @@ import {
   type ModelParameterBase,
 } from "../ExtraObjectWrapper";
 import ThreeMeshUI from "three-mesh-ui";
-import { degToRad } from "three/src/math/MathUtils";
 import { AnimationParameter } from "../../types/DataType";
 import { getState } from "../../utility/SceneUtility";
 import { Raycaster, Color, Camera } from "three/src/Three";
@@ -65,7 +64,7 @@ export class MeshUiButtonWrapper extends ExtraObjectWrapper {
     /** 位置を元のタグの位置に合わせる */
     this.applyAttitude(container, parameter);
     /** シーンに配置する */
-    parameter.rootScene.add(container);
+    this._rootScene.add(container);
 
     /** ボタンを作成する */
     const button: any = new ThreeMeshUI.Block({
@@ -116,7 +115,7 @@ export class MeshUiButtonWrapper extends ExtraObjectWrapper {
     this._text = text;
 
     /** カメラを参照する */
-    const { camera } = getState(parameter.rootScene);
+    const { camera } = getState(this._rootScene);
     that._camera = camera;
 
     return this;

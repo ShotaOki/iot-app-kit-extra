@@ -3,7 +3,6 @@ import {
   type ModelParameterBase,
 } from "../ExtraObjectWrapper";
 import {
-  Scene,
   BufferGeometry,
   Material,
   SkinnedMesh,
@@ -13,24 +12,21 @@ import {
 } from "three/src/Three";
 import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader";
 import { AnimationParameter, SystemLoadingStatus } from "../../types/DataType";
-import { degToRad } from "three/src/math/MathUtils";
 
 export interface MMDModelParameter extends ModelParameterBase {
   // MMDモデルのファイルパス
   pmxPath: string;
   // モーションの読み込みリスト, モーション名: ファイルパス
-  motionMap?: { [key: string]: string };
+  useMotionList?: { [key: string]: string };
 }
 type MMDMesh = SkinnedMesh<BufferGeometry, Material | Material[]>;
 
-export interface StateChangeEvent {
-  /** 状態変更イベント: 状態が変更された */
-  onChangeState: (
-    mesh: MMDMesh,
-    model: MMDModelWrapper,
-    state: string | number
-  ) => string[];
-}
+/** 状態変更イベント: 状態が変更された */
+export type StateChangeEvent = (
+  mesh: MMDMesh,
+  model: MMDModelWrapper,
+  state: string | number
+) => string[];
 
 export class MMDModelWrapper extends ExtraObjectWrapper {
   // MMDモデル
@@ -40,7 +36,7 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
   // アニメーションを管理するミキサー
   private _mixier?: AnimationMixer;
   // アニメーションのマップ
-  private _motionMap?: { [key: string]: AnimationClip };
+  private _useMotionList?: { [key: string]: AnimationClip };
   // タイマーループ
   private _clock?: Clock;
 
@@ -75,22 +71,22 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
       }
 
       // 読み込んだMMDモデルを表示する
-      parameter.rootScene.add(mesh);
+      this._rootScene.add(mesh);
       this._mesh = mesh;
 
       // 状態を初期化する
       that.stateChange(SystemLoadingStatus.Init);
 
       // モーションを読み込む
-      if (parameter.motionMap) {
-        const motionKeyList = Object.keys(parameter.motionMap);
+      if (parameter.useMotionList) {
+        const motionKeyList = Object.keys(parameter.useMotionList);
         Promise.all(
           motionKeyList.map(
             (key) =>
               new Promise((resolve) =>
                 // アニメーションを非同期で読み込む
                 new MMDLoader().loadAnimation(
-                  parameter.motionMap![key],
+                  parameter.useMotionList![key],
                   mesh,
                   (animation) => {
                     // 非同期読み込みの完了を通知
@@ -100,12 +96,12 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
               )
           )
         ).then((results) => {
-          const motionMap: { [key: string]: AnimationClip } = {};
+          const useMotionList: { [key: string]: AnimationClip } = {};
           results.forEach((motion, index) => {
-            motionMap[motionKeyList[index]] = motion as AnimationClip;
+            useMotionList[motionKeyList[index]] = motion as AnimationClip;
           });
           this._flagLoaded = true;
-          this._motionMap = motionMap;
+          this._useMotionList = useMotionList;
         });
       } else {
         this._flagLoaded = true;
@@ -123,13 +119,9 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
    *
    * @param newState 次のオブジェクトの状態
    */
-  protected onChangeState(newState: string | number) {
+  protected receivedChangeState(newState: string | number) {
     if (this._stateChange && this._mesh && this._mixier) {
-      const animationNames = this._stateChange.onChangeState(
-        this._mesh!,
-        this,
-        newState
-      );
+      const animationNames = this._stateChange(this._mesh!, this, newState);
       // もしアニメーションの戻り値がないのならアニメーションを終了する
       if (!(animationNames && animationNames.length)) {
         if (this._mixier) {
@@ -138,10 +130,10 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
         }
       }
       // 戻り値で受け取ったアニメーションを再生する
-      if (this._mixier && this._motionMap) {
+      if (this._mixier && this._useMotionList) {
         this._mixier.stopAllAction();
         for (let name of animationNames) {
-          const motion = this._motionMap[name];
+          const motion = this._useMotionList[name];
           this._mixier.clipAction(motion).play();
         }
       }
@@ -154,7 +146,7 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
    * @param stateChange 状態変更イベント
    * @returns 自身のオブジェクト（チェイン可能）
    */
-  bindOnStateChangeEvent(stateChange: StateChangeEvent) {
+  onStateChangeEvent(stateChange: StateChangeEvent) {
     this._stateChange = stateChange;
     return this;
   }

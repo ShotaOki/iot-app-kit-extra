@@ -5,13 +5,12 @@ import {
 import { AnimationMixer, Clock } from "three/src/Three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { AnimationParameter, SystemLoadingStatus } from "../../types/DataType";
-import { degToRad } from "three/src/math/MathUtils";
 
 export interface GLTFModelParameter extends ModelParameterBase {
   // GLBモデルのファイルパス
   modelPath: string;
   // モーションの読み込みリスト, モーション名: ファイルパス
-  motionMap?: { [key: string]: string };
+  useMotionList?: { [key: string]: string };
 }
 
 export class GLTFModelWrapper extends ExtraObjectWrapper {
@@ -43,7 +42,7 @@ export class GLTFModelWrapper extends ExtraObjectWrapper {
       model.receiveShadow = true;
 
       // 読み込んだMMDモデルを表示する
-      parameter.rootScene.add(model);
+      this._rootScene.add(model);
 
       // 状態を初期化する
       that.stateChange(SystemLoadingStatus.Init);

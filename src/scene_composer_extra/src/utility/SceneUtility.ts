@@ -14,8 +14,9 @@ import {
   SceneControllerState,
 } from "../controllers/SceneController";
 import { useState, useEffect, useMemo } from "react";
-import { ReplaceTag } from "../controllers/TagController";
+import { ReplaceContext } from "../controllers/TagController";
 import { generateUUID } from "three/src/math/MathUtils";
+import { OverrideTagsParameter } from "../types/DataType";
 
 /** ルートシーンを取得する */
 export function findRootScene(target: Object3D<Event> | undefined) {
@@ -48,10 +49,26 @@ export function setupSceneForMMD(gl: WebGLRenderer) {
   gl.toneMapping = LinearToneMapping;
 }
 
+/**
+ * ユーティリティ: タグの上書きをする
+ * useSceneControllerのoverrideTagsだけを実行して、SceneControllerを返す
+ *
+ * @param factory OverrideTagsParameterを作成する関数
+ */
+export function useOverrideTags(
+  parameter: OverrideTagsParameter
+): SceneController {
+  return useSceneController((composerId, context) => {
+    return new SceneController(composerId, context, {
+      overrideTags: parameter,
+    });
+  });
+}
+
 /** シーンコントローラーを作成する関数 */
 type SceneControllerFactory = (
   composerId: string,
-  replaceTag: ReplaceTag
+  context: ReplaceContext
 ) => SceneController;
 
 /**
@@ -83,7 +100,7 @@ export function useSceneController(
 
   /** コントローラを作成する */
   const controller = useMemo(
-    () => factory(composerId, new ReplaceTag(getObject3DBySceneNodeRef)),
+    () => factory(composerId, new ReplaceContext(getObject3DBySceneNodeRef)),
     [composerId, getObject3DBySceneNodeRef]
   );
 
