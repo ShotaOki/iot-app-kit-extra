@@ -65,10 +65,7 @@ TwinMaker にあらかじめタグを作成しておきます。
 ```typescript
 import { initialize } from "@iot-app-kit/source-iottwinmaker";
 import { SceneViewer } from "@iot-app-kit/scene-composer";
-import {
-  SceneController,
-  useSceneController,
-} from "@iak-extra/scene-composer-extra";
+import { useOverrideTags } from "@iak-extra/scene-composer-extra";
 
 function App() {
   // TwinMakerのシーンを読み込む
@@ -76,22 +73,13 @@ function App() {
   const sceneLoader = twinmaker.s3SceneLoader(/** シーン情報 */);
 
   /** TwinMakerをカスタマイズするコントローラー */
-  const controller = useSceneController(
-    (composerId, replaceTag) =>
-      new SceneController(composerId, {
-        /** TwinMakerのタグを上書きする */
-        overrideTags(rootScene) {
-          return {
-            // TwinMakerのタグをテキストに置き換える
-            "any-text-tag-name": (ref, anchor) =>
-              replaceTag.toText(ref, anchor)?.create({
-                rootScene,
-                content: "TextContents",
-              }),
-          };
-        },
-      })
-  );
+  const controller = useOverrideTags({
+    // TwinMakerのタグをテキストに置き換える
+    "any-text-tag-name": (replaceTag) =>
+      replaceTag.toText?.create({
+        content: "TextContents",
+      }),
+  });
 
   return (
     <div className="App">
@@ -109,8 +97,8 @@ export default App;
 同様に、以下のように書くと、タグが MMD に置き換わります。
 
 ```typescript
-"any-mmd-tag-name": (ref, anchor) => {
-    replaceTag.toMMD(ref, anchor)?.create({
+"any-mmd-tag-name": (replaceTag) => {
+    replaceTag.toMMD?.create({
         // MMDの初期化情報
     })
 }
@@ -119,10 +107,13 @@ export default App;
 以下のように書くと、タグがボタンに置き換わります
 
 ```typescript
-"any-button-tag-name": (ref, anchor) => {
-    replaceTag.toButton(ref, anchor)?.create({
+"any-button-tag-name": (replaceTag) => {
+    replaceTag.toButton?.create({
         // ボタンの初期化情報
     })
+    .onClickEvent(() => {
+      console.log("clicked !!");
+    }),
 }
 ```
 

@@ -65,10 +65,7 @@ Simply write the following to replace the tag with the name "any-text-tag-name" 
 ```typescript
 import { initialize } from "@iot-app-kit/source-iottwinmaker";
 import { SceneViewer } from "@iot-app-kit/scene-composer";
-import {
-  SceneController,
-  useSceneController,
-} from "@iak-extra/scene-composer-extra";
+import { useOverrideTags } from "@iak-extra/scene-composer-extra";
 
 function App() {
   // Read TwinMaker Scene
@@ -76,22 +73,13 @@ function App() {
   const sceneLoader = twinmaker.s3SceneLoader(/** Scene Info */);
 
   /** Controller for TwinMaker */
-  const controller = useSceneController(
-    (composerId, replaceTag) =>
-      new SceneController(composerId, {
-        /** Override Twinmaker Tags */
-        overrideTags(rootScene) {
-          return {
-            // Replace Tag to Text
-            "any-text-tag-name": (ref, anchor) =>
-              replaceTag.toText(ref, anchor)?.create({
-                rootScene,
-                content: "TextContents",
-              }),
-          };
-        },
-      })
-  );
+  const controller = useOverrideTags({
+    // Replace Tag to Text
+    "any-text-tag-name": (replaceTag) =>
+      replaceTag.toText?.create({
+        content: "TextContents",
+      }),
+  });
 
   return (
     <div className="App">
@@ -109,8 +97,8 @@ export default App;
 Similarly, the tag is replaced by MMD when written as follows.
 
 ```typescript
-"any-mmd-tag-name": (ref, anchor) => {
-    replaceTag.toMMD(ref, anchor)?.create({
+"any-mmd-tag-name": (replaceTag) => {
+    replaceTag.toMMD?.create({
         // MMD Initialize Info
     })
 }
@@ -119,10 +107,13 @@ Similarly, the tag is replaced by MMD when written as follows.
 The following will replace the tag with a button.
 
 ```typescript
-"any-button-tag-name": (ref, anchor) => {
-    replaceTag.toButton(ref, anchor)?.create({
+"any-button-tag-name": (replaceTag) => {
+    replaceTag.toButton?.create({
         // Button Initialize Info
     })
+    .onClickEvent(() => {
+      console.log("clicked !!");
+    }),
 }
 ```
 
