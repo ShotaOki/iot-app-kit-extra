@@ -25,7 +25,7 @@ function App() {
           console.log("clicked: 閉じる");
         }),
     // TwinMakerのタグをボタンに置き換える
-    兎田ぺこら: (replaceTag) =>
+    初音ミク: (replaceTag) =>
       replaceTag.toMMD
         ?.create({
           angle: 0,

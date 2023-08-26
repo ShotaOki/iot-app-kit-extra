@@ -6,12 +6,11 @@ import {
   BufferGeometry,
   Material,
   SkinnedMesh,
-  AnimationMixer,
   AnimationClip,
   Clock,
 } from "three/src/Three";
 import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader";
-import { CCDIKSolver } from "three/examples/jsm/animation/CCDIKSolver";
+import { MMDAnimationHelper } from "three/examples/jsm/animation/MMDAnimationHelper";
 import { AnimationParameter, SystemLoadingStatus } from "../../types/DataType";
 
 export interface MMDModelParameter extends ModelParameterBase {
@@ -34,14 +33,12 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
   private _mesh?: MMDMesh;
   // 状態変更イベント
   private _stateChange?: StateChangeEvent;
-  // アニメーションを管理するミキサー
-  private _mixier?: AnimationMixer;
   // アニメーションのマップ
   private _useMotionList?: { [key: string]: AnimationClip };
   // タイマーループ
   private _clock?: Clock;
-  // IKのリゾルバ
-  private _ikResolver?: CCDIKSolver;
+  // アニメーションヘルパー
+  private _animationHelper?: MMDAnimationHelper;
 
   /**
    * 初期化する
@@ -52,6 +49,9 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
   create(parameter: MMDModelParameter) {
     // ローダーを作成する
     const loader = new MMDLoader();
+    // アニメーションヘルパー
+    const animationHelper = new MMDAnimationHelper({ afterglow: 2.0 });
+    this._animationHelper = animationHelper;
     // 自身のインスタンスの参照を保持
     const that = this;
     /** 非同期でMMDモデルを取得する */
@@ -61,9 +61,6 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
       // 影を表示する
       mesh.castShadow = true;
       mesh.receiveShadow = true;
-
-      // アニメーションミキサーを初期化する
-      this._mixier = new AnimationMixer(mesh);
 
       // 発光設定、アウトライン設定をTwinMakerに合わせて補正する
       for (let m of mesh.material as Material[]) {
@@ -103,14 +100,6 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
           results.forEach((motion, index) => {
             useMotionList[motionKeyList[index]] = motion as AnimationClip;
           });
-          try {
-            this._ikResolver = new CCDIKSolver(
-              mesh,
-              mesh.geometry.userData.MMD.iks
-            );
-          } catch (_) {
-            this._ikResolver = undefined;
-          }
           this._flagLoaded = true;
           this._useMotionList = useMotionList;
         });
@@ -131,22 +120,27 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
    * @param newState 次のオブジェクトの状態
    */
   protected receivedChangeState(newState: string | number) {
-    if (this._stateChange && this._mesh && this._mixier) {
+    if (this._stateChange && this._mesh && this._animationHelper) {
       const animationNames = this._stateChange(this._mesh!, this, newState);
       // もしアニメーションの戻り値がないのならアニメーションを終了する
       if (!(animationNames && animationNames.length)) {
-        if (this._mixier) {
-          this._mixier.stopAllAction();
+        if (this._animationHelper) {
+          if (this._animationHelper.objects.has(this._mesh)) {
+            this._animationHelper.remove(this._mesh);
+          }
           return;
         }
       }
       // 戻り値で受け取ったアニメーションを再生する
-      if (this._mixier && this._useMotionList) {
-        this._mixier.stopAllAction();
-        for (let name of animationNames) {
-          const motion = this._useMotionList[name];
-          this._mixier.clipAction(motion).play();
+      if (this._animationHelper && this._useMotionList) {
+        const motionList = this._useMotionList;
+        if (this._animationHelper.objects.has(this._mesh)) {
+          this._animationHelper.remove(this._mesh);
         }
+        this._animationHelper?.add(this._mesh, {
+          animation: animationNames.map((name) => motionList[name]),
+          physics: false,
+        });
       }
     }
   }
@@ -164,13 +158,10 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
 
   /** アニメーションループ */
   executeAnimationLoop(parameter: AnimationParameter) {
-    if (this._ikResolver) {
-      this._ikResolver.update();
-    }
     // アニメーションの状態を更新
     if (this._clock) {
       const delta = this._clock.getDelta();
-      if (this._mixier) this._mixier.update(delta);
+      if (this._animationHelper) this._animationHelper.update(delta);
     }
   }
 }

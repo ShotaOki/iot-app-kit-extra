@@ -2,6 +2,12 @@
 
 # install
 
+サンプルが使うリソース（MMD のファイルなど）を public ディレクトリにダウンロードする
+
+```bash
+npm run download
+```
+
 インストールする
 
 ```bash
