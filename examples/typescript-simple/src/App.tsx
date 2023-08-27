@@ -30,9 +30,9 @@ function App() {
         ?.create({
           angle: 0,
           scale: 0.08,
-          pmxPath: "./example/miku_v2.pmd",
+          pmxPath: "/example/miku_v2.pmd",
           useMotionList: {
-            dance: "./example/wavefile_v2.vmd",
+            dance: "/example/wavefile_v2.vmd",
           },
         })
         .onStateChangeEvent((mesh, model, state) => {
@@ -50,13 +50,11 @@ function App() {
             content: new Date().toISOString().split(".")[0],
           });
         }),
-    /*
     部屋: (replaceTag) =>
       replaceTag.toGLTF?.create({
         angle: 0,
-        modelPath: "/studio_apartment_vray_baked_textures_included.glb",
+        modelPath: "/example/studio_apartment_vray_baked_textures_included.glb",
       }),
-      */
   });
   return (
     <SceneViewer
