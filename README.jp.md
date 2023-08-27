@@ -117,6 +117,37 @@ export default App;
 }
 ```
 
+## クイックスタート
+
+テンプレートを利用することで、このライブラリを利用したアプリを簡単に作成できます
+
+1. IoT App Kit のテンプレートをダウンロード、zip ファイルを展開します
+
+```bash
+# テンプレートをダウンロードします
+curl https://raw.githubusercontent.com/ShotaOki/iot-app-kit-extra/main/templates/typescript-simple.zip -o typescript-simple.zip
+```
+
+2. 展開したテンプレートの中で、セットアップ用のコマンドを実行します
+
+```bash
+# 展開後、package.jsonのあるディレクトリに移動します
+cd typescript-simple
+
+# アセットファイルをダウンロードします
+npm run download
+
+# 依存ライブラリをインストールします
+npm install --legacy-peer-deps
+```
+
+3. React を実行して、サーバーを立てます
+
+```bash
+# サーバをlocalhost:3000で立ち上げます
+npm run start
+```
+
 ## 開発
 
 以下のコマンドを実行することで、ライブラリをインストールします。

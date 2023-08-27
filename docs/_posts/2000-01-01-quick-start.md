@@ -14,19 +14,30 @@ layout: post
 
 ※認証情報、AWS の設定は不要です
 
-1. このリポジトリの`examples/typescript-samples`をローカルにコピーします
-
-2. セットアップ用のコマンドを実行します
+1. IoT App Kit のテンプレートをダウンロード、zip ファイルを展開します
 
 ```bash
+# テンプレートをダウンロードします
+curl https://raw.githubusercontent.com/ShotaOki/iot-app-kit-extra/main/templates/typescript-simple.zip -o typescript-simple.zip
+```
+
+2. 展開したテンプレートの中で、セットアップ用のコマンドを実行します
+
+```bash
+# 展開後、package.jsonのあるディレクトリに移動します
+cd typescript-simple
+
+# アセットファイルをダウンロードします
 npm run download
 
-npm install
+# 依存ライブラリをインストールします
+npm install --legacy-peer-deps
 ```
 
 3. React を実行して、サーバーを立てます
 
 ```bash
+# サーバをlocalhost:3000で立ち上げます
 npm run start
 ```
 
