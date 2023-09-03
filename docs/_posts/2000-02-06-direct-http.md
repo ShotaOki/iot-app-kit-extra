@@ -1,5 +1,5 @@
 ---
-title: Build (Independent)
+title: HTTPリクエストの送信
 author: Shota Oki
 date: 2023-08-20
 category: Jekyll

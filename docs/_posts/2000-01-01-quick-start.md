@@ -1,5 +1,5 @@
 ---
-title: Quick Start
+title: すぐに始める
 author: Shota Oki
 date: 2023-08-20
 category: Jekyll
