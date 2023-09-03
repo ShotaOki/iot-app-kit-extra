@@ -13,3 +13,4 @@ export { stringToDefaultAnchorStatus } from "./utility/TwinMakerTagNames";
 export { FontData, type FontDataParameter } from "./types/MeshUiFont";
 export { DirectSceneLoader } from "./utility/DirectSceneLoader";
 export { ButtonStyle } from "./objects/three-mesh-ui/theme/ButtonStyle";
+export { proxyFetch } from "./proxy/ServiceProxy";

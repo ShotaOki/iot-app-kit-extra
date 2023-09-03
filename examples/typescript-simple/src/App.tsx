@@ -4,6 +4,7 @@ import {
   useOverrideTags,
   DirectSceneLoader,
   ButtonStyle,
+  proxyFetch,
 } from "@iak-extra/scene-composer-extra";
 
 function App() {
@@ -23,6 +24,13 @@ function App() {
         })
         .onClickEvent(() => {
           console.log("clicked: 閉じる");
+          // proxyFetchはfetch互換のAPIです。npm run start時だけ動作します
+          // proxyFetchは、どのドメインからもCORSの制限を受けません
+          proxyFetch("https://www.w3.org/").then((r) => {
+            r.text().then((t) => {
+              console.log(t);
+            });
+          });
         }),
     // TwinMakerのタグをボタンに置き換える
     初音ミク: (replaceTag) =>

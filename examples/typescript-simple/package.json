@@ -4,7 +4,8 @@
   "private": true,
   "dependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@iak-extra/scene-composer-extra": "^0.2.1",
+    "@iak-extra/local-server-proxy": "^0.1.1",
+    "@iak-extra/scene-composer-extra": "^0.2.2",
     "@iot-app-kit/components": "^6.2.0",
     "@iot-app-kit/react-components": "^6.2.0",
     "@iot-app-kit/scene-composer": "^3.3.0",

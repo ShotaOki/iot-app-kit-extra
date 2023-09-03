@@ -1,7 +1,7 @@
 {
   "name": "@iak-extra/local-server-proxy",
-  "version": "0.1.0",
-  "description": "Extra Libraries for IoT App Kit Scene Composer",
+  "version": "0.1.1",
+  "description": "Local Transfer Server for IoT App Kit",
   "publishConfig": {
     "access": "public"
   },

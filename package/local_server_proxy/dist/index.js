@@ -1,4 +1,4 @@
-const PROXY_FETCH_REGEX = /^\/proxy\/fetch\/host=(.+)\//;
+const PROXY_FETCH_REGEX = /^\/proxy\/fetch\/host=(.+?)\//;
 
 function readHostName(path) {
   try {
@@ -13,7 +13,11 @@ function readHostName(path) {
   }
 }
 
-module.exports = function (app, createProxyMiddleware, host = "http://localhost:8000") {
+module.exports = function (
+  app,
+  createProxyMiddleware,
+  host = "http://localhost:8000"
+) {
   app.use(
     /^\/proxy\/fetch/,
     createProxyMiddleware(
