@@ -1,0 +1,23 @@
+{
+  "name": "@iak-extra/local-server-proxy",
+  "version": "0.1.0",
+  "description": "Extra Libraries for IoT App Kit Scene Composer",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "./dist/*",
+    "./dist/**"
+  ],
+  "author": "shotaoki",
+  "license": "MIT",
+  "dependencies": {
+    "http-proxy-middleware": "^2.0.6"
+  },
+  "devDependencies": {}
+}
