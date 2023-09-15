@@ -20,18 +20,19 @@
   "author": "shotaoki",
   "license": "MIT",
   "dependencies": {
-    "typescript": "^5.1.6",
+    "@iot-app-kit/scene-composer": "^3.4.0",
     "@iot-app-kit/source-iottwinmaker": "^6.2.0",
-    "@iot-app-kit/scene-composer": "^3.3.0",
     "@react-three/drei": "^9.44.1",
     "@react-three/fiber": "^8.13.3",
     "jsx-runtime": "^1.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "recharts": "^2.8.0",
     "three": "^0.139.0",
     "three-mesh-bvh": "^0.5.15",
     "three-mesh-ui": "^6.5.4",
-    "three-stdlib": "^2.18.1"
+    "three-stdlib": "^2.18.1",
+    "typescript": "^5.1.6"
   },
   "devDependencies": {
     "@types/jest": "^27.5.2",

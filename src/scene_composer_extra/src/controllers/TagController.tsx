@@ -10,6 +10,7 @@ import { MeshUiTextWrapper } from "../objects/three-mesh-ui/MeshUiTextWrapper";
 import { Object3D, Event, Scene } from "three/src/Three";
 import { GLTFModelWrapper } from "../objects/model/GLTFModelWrapper";
 import { HTMLModelWrapper } from "../objects/html/HTMLModelWrapper";
+import { LineChartModelWrapper } from "../objects/graph/LineChartModelWrapper";
 
 /**
  * タグを検索する
@@ -203,6 +204,24 @@ export class ReplaceTag {
     if (tag) {
       tag.visible = false;
       return new HTMLModelWrapper(
+        this._rootScene,
+        tag.position,
+        tag.rotation,
+        tag.scale,
+        this._anchor
+      );
+    }
+    return undefined;
+  }
+
+  /**
+   * TwinMakerのタグオブジェクトを線グラフに置き換える
+   */
+  get toLineChart() {
+    const tag = this._tag;
+    if (tag) {
+      tag.visible = false;
+      return new LineChartModelWrapper(
         this._rootScene,
         tag.position,
         tag.rotation,
