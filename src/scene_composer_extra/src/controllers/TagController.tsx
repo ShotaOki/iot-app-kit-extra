@@ -9,6 +9,7 @@ import { MeshUiButtonWrapper } from "../objects/three-mesh-ui/MeshUiButtonWrappe
 import { MeshUiTextWrapper } from "../objects/three-mesh-ui/MeshUiTextWrapper";
 import { Object3D, Event, Scene } from "three/src/Three";
 import { GLTFModelWrapper } from "../objects/model/GLTFModelWrapper";
+import { HTMLModelWrapper } from "../objects/html/HTMLModelWrapper";
 
 /**
  * タグを検索する
@@ -184,6 +185,24 @@ export class ReplaceTag {
     if (tag) {
       tag.visible = false;
       return new MeshUiTextWrapper(
+        this._rootScene,
+        tag.position,
+        tag.rotation,
+        tag.scale,
+        this._anchor
+      );
+    }
+    return undefined;
+  }
+
+  /**
+   * TwinMakerのタグオブジェクトをHTMLに置き換える
+   */
+  get toHTML() {
+    const tag = this._tag;
+    if (tag) {
+      tag.visible = false;
+      return new HTMLModelWrapper(
         this._rootScene,
         tag.position,
         tag.rotation,
