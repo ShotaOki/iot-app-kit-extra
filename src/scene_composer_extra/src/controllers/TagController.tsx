@@ -10,7 +10,17 @@ import { MeshUiTextWrapper } from "../objects/three-mesh-ui/MeshUiTextWrapper";
 import { Object3D, Event, Scene } from "three/src/Three";
 import { GLTFModelWrapper } from "../objects/model/GLTFModelWrapper";
 import { HTMLModelWrapper } from "../objects/html/HTMLModelWrapper";
-import { LineChartModelWrapper } from "../objects/graph/LineChartModelWrapper";
+import { RechartsModelWrapper } from "../objects/graph/RechartsModelWrapper";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  XAxis,
+  YAxis,
+} from "recharts";
+import React from "react";
 
 /**
  * タグを検索する
@@ -221,12 +231,56 @@ export class ReplaceTag {
     const tag = this._tag;
     if (tag) {
       tag.visible = false;
-      return new LineChartModelWrapper(
+      return new RechartsModelWrapper(
         this._rootScene,
         tag.position,
         tag.rotation,
         tag.scale,
         this._anchor
+      ).updateRachartsComponent(
+        LineChart,
+        <>
+          <XAxis dataKey="x" />
+          <YAxis />
+          <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
+          <Line
+            type="monotone"
+            dataKey="y"
+            stroke="#8884d8"
+            isAnimationActive={false}
+          />
+        </>
+      );
+    }
+    return undefined;
+  }
+
+  /**
+   * TwinMakerのタグオブジェクトを棒グラフに置き換える
+   */
+  get toBarChart() {
+    const tag = this._tag;
+    if (tag) {
+      tag.visible = false;
+      return new RechartsModelWrapper(
+        this._rootScene,
+        tag.position,
+        tag.rotation,
+        tag.scale,
+        this._anchor
+      ).updateRachartsComponent(
+        BarChart,
+        <>
+          <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
+          <XAxis dataKey="x" />
+          <YAxis />
+          <Bar
+            type="monotone"
+            dataKey="y"
+            fill="#8884d8"
+            isAnimationActive={false}
+          />
+        </>
       );
     }
     return undefined;
