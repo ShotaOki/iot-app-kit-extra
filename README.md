@@ -42,9 +42,17 @@ Equivalent to IoT App Kit.
 
 ## Usage
 
+### Quick Start
+
+Create new react application with iot-extra.
+
+```bash
+npx @iak-extra/cli create ${Application Name}
+```
+
 ### Installation
 
-You can install with NPM.
+Already exists react project, you can install with NPM.
 
 ```bash
 npm install @iak-extra/scene-composer-extra
@@ -115,37 +123,6 @@ The following will replace the tag with a button.
       console.log("clicked !!");
     }),
 }
-```
-
-## Quick Start
-
-Templates make it easy to create apps using this library.
-
-1. Download the IoT App Kit template and extract the zip file.
-
-```bash
-# Download the Template
-curl https://raw.githubusercontent.com/ShotaOki/iot-app-kit-extra/main/templates/typescript-simple.zip -o typescript-simple.zip
-```
-
-2. In the extracted template, run the setup commands.
-
-```bash
-# Once extracted, move to the directory where package.json is located
-cd typescript-simple
-
-# Download Asset files.
-npm run download
-
-# Install dependant libraries
-npm install --legacy-peer-deps
-```
-
-3. Execute React
-
-```bash
-# Start Server, localhost:3000
-npm run start
 ```
 
 ## Development

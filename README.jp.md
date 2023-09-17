@@ -42,9 +42,17 @@ IoT App Kit に準じる
 
 ## 使い方
 
-### インストール
+### クイックスタート（新規作成）
 
-NPM でインストールすることができます
+CLI を使って、IoT Extra と TwinMaker を使った Web アプリを簡単に作成できます
+
+```bash
+npx @iak-extra/cli create ${Application Name}
+```
+
+### インストール（既存のアプリに追加）
+
+もし既存の Web アプリに IoT Extra を追加する必要があるのなら、NPM でインストールすることができます
 
 ```bash
 npm install @iak-extra/scene-composer-extra
@@ -60,7 +68,7 @@ TwinMaker にあらかじめタグを作成しておきます。
 
 ### 利用する
 
-以下のように書くだけで、"any-text-tag-name"の名前を付けたタグが、ThreeMeshUi のテキストオブジェクトに置き換わります。
+useOverrideTags の関数を書くだけで、"any-text-tag-name"の名前を付けたタグが、ThreeMeshUi のテキストオブジェクトに置き換わります。
 
 ```typescript
 import { initialize } from "@iot-app-kit/source-iottwinmaker";
@@ -117,36 +125,7 @@ export default App;
 }
 ```
 
-## クイックスタート
-
-テンプレートを利用することで、このライブラリを利用したアプリを簡単に作成できます
-
-1. IoT App Kit のテンプレートをダウンロード、zip ファイルを展開します
-
-```bash
-# テンプレートをダウンロードします
-curl https://raw.githubusercontent.com/ShotaOki/iot-app-kit-extra/main/templates/typescript-simple.zip -o typescript-simple.zip
-```
-
-2. 展開したテンプレートの中で、セットアップ用のコマンドを実行します
-
-```bash
-# 展開後、package.jsonのあるディレクトリに移動します
-cd typescript-simple
-
-# アセットファイルをダウンロードします
-npm run download
-
-# 依存ライブラリをインストールします
-npm install --legacy-peer-deps
-```
-
-3. React を実行して、サーバーを立てます
-
-```bash
-# サーバをlocalhost:3000で立ち上げます
-npm run start
-```
+他にも、グラフ、表、HTML のウェブサイト等、様々なものへの置き換えが可能です。
 
 ## 開発
 
