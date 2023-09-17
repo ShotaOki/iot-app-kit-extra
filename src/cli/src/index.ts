@@ -21,14 +21,40 @@ export function createReactApp(props: CreateReactAppParameter) {
     return;
   }
 
+  console.log(">> 1. Download template");
+
   // アプリを作成する
   CreateReactApp.create(props);
 
   // 標準テンプレートだった場合
   if (props.template == "typescript-simple") {
+    console.log(">> 2. Download example resources");
+
     // アプリの必要なリソースをダウンロードする
     DownloadResource.download({ name: "example-twinmaker" }, props.appName);
   }
+
+  console.log(">> 3. Execute NPM install command");
+
+  // Npm Installを実行する
+  CreateReactApp.install(props);
+
+  console.log("");
+  console.log(`Completed! Created ${props.appName}`);
+  console.log("Inside that directory, you can run sevral commands: ");
+  console.log("");
+  console.log("======================");
+  console.log("npm start");
+  console.log("    Starts the development server.");
+  console.log("npm run build");
+  console.log("    Bundles the app into static files for production.");
+  console.log("======================");
+  console.log("");
+  console.log(`We suggest that you begin by typing:`);
+  console.log("");
+  console.log(`cd ${props.appName}`);
+  console.log("npm start");
+  console.log("");
 }
 
 /**

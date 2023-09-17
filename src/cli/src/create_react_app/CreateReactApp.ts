@@ -2,6 +2,7 @@ import { Unzip, AsyncUnzipInflate, FlateError } from "fflate";
 import { DownloadUtility } from "../common/DownloadUtility.js";
 import { createWriteStream, existsSync, mkdirSync, readFileSync } from "fs";
 import { resolve, dirname } from "path";
+import { spawn } from "child_process";
 
 /** 入力パラメータ */
 export interface CreateReactAppParameter {
@@ -101,6 +102,19 @@ export class CreateReactApp {
       };
       // ZIPを展開する
       unzipper.push(receivedItem);
+    });
+  }
+
+  /**
+   * Npm install を実行する
+   * @param props アプリの情報
+   */
+  static install(props: CreateReactAppParameter) {
+    const workingdirectory = resolve(process.cwd(), props.appName);
+    spawn("npm", ["install", "--legacy-peer-deps"], {
+      cwd: workingdirectory,
+      shell: true,
+      stdio: "inherit",
     });
   }
 
