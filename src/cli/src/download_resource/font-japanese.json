@@ -1,0 +1,20 @@
+[
+  {
+    "url": "https://raw.githubusercontent.com/studioTeaTwo/aframe-japanese-font/main/fonts/noto-sans-cjk-jp/noto-sans-cjk-jp-msdf.json",
+    "path": "noto-sans-cjk-jp-msdf.json",
+    "directory": "font",
+    "message": [
+      "Download URL: https://github.com/studioTeaTwo/aframe-japanese-font",
+      "Font URL: https://fonts.google.com/noto#sans-jpan"
+    ]
+  },
+  {
+    "url": "https://raw.githubusercontent.com/studioTeaTwo/aframe-japanese-font/main/fonts/noto-sans-cjk-jp/noto-sans-cjk-jp-msdf.png",
+    "path": "noto-sans-cjk-jp-msdf.png",
+    "directory": "font",
+    "message": [
+      "Download URL: https://github.com/studioTeaTwo/aframe-japanese-font",
+      "Font URL: https://fonts.google.com/noto#sans-jpan"
+    ]
+  }
+]

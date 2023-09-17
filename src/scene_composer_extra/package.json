@@ -9,13 +9,15 @@
   "module": "./dist/es/index.js",
   "types": "./dist/es/index.d.ts",
   "scripts": {
-    "build": "npm run build:es && npm run build:cjs",
+    "build": "npm run build:es && npm run build:cjs && npm run copy:config",
     "build:es": "tsc -p ./tsconfig.json --outDir ../../package/scene_composer_extra/dist/es",
     "build:cjs": "tsc -p ./tsconfig.json --outDir ../../package/scene_composer_extra/dist/cjs --module CommonJS",
+    "copy:config": "copy package.json ..\\..\\package\\scene_composer_extra\\package.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "files": [
-    "./dist/*"
+    "./dist/*",
+    "./dist/**"
   ],
   "author": "shotaoki",
   "license": "MIT",
