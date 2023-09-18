@@ -12,7 +12,7 @@ layout: post
 
 通常の Web アプリと同様に、fetch を使ってリクエストを投げることができます
 
-```typescript
+```jsx
 // fetchでHTTPリクエストを送信する
 fetch("https://anyurl/path").then((response) => {
   response.text((data) => {
@@ -33,7 +33,7 @@ npm install @iak-extra/local-server-proxy --legacy-peer-deps
 
 手順 2. 次の内容で、`src/setupProxy.js` のファイルを作成します
 
-```javascript
+```jsx
 const { createProxyMiddleware } = require("http-proxy-middleware");
 const ServiceProxy = require("@iak-extra/local-server-proxy");
 
@@ -45,7 +45,7 @@ module.exports = function (app) {
 
 手順 3. fetch を proxyFetch に置き換えます
 
-```typescript
+```jsx
 // proxyFetchをインポートする
 import { proxyFetch } from "@iak-extra/scene-composer-extra";
 
