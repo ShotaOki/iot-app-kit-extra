@@ -70,6 +70,11 @@ npm run build
 
 既存のReactアプリがあるのなら、以下のコマンドでscene-composer-extraを追加します。
 
+**前提条件**
+
+- SceneComposerを導入したReactアプリが既に存在する
+
+
 **依存ライブラリをインストールします**
 
 ```bash
@@ -80,5 +85,89 @@ npm install @iak-extra/scene-composer-extra --legacy-peer-deps
 
 - three.js と関係するライブラリのバージョンを、scene-composer に合わせます
 
+---
+
+## クラウドと接続する
+
+AWSアカウントを持っていれば、TwinMakerのシーンをAWSアカウント上で管理することができます
+
+**前提条件**
+
+- AWSアカウントを持っている
+
+**接続する方法**
+
+`DirectSceneLoader`は、AWSのアカウントを通さず、publicフォルダの設定だけで動かすための設定です。
+
+**元のソース**
+
+```jsx
+const sceneLoader = new DirectSceneLoader("publicディレクトリにあるファイル名")
+```
+
+AWSアカウントと連携する場合は、sceneLoaderの取得処理を以下のように書き変えます。
+
+**書き変えた後のソース**
+
+```jsx
+  // TwinMakerのシーンを読み込む
+  const twinmaker = initialize("TwinMakerのワークスペース名", {
+    awsCredentials: {
+      accessKeyId: "AWSの認証情報（ACCESS_KEY_ID）",
+      secretAccessKey: "AWSの認証情報（シークレットアクセスキー）",
+    },
+    awsRegion: "リージョン名",
+  });
+  // 画面情報を読み込む
+  const sceneLoader = twinmaker.s3SceneLoader(
+    "TwinMakerのシーン名"
+  );
+```
+
+注意：認証情報をソースに書いたままデプロイしないでください  
+※AmplifyのCognitoを使って、ログインユーザーから認証情報を取るなど、ソース外部から認証情報を取るようにしてください
+
+## IoTデータと連携する
+
+AWSが蓄積したリアルタイムなIoTデータと連携して、現実世界をバーチャル世界で可視化する「デジタルツイン」を作ることができます
+
+**前提条件**
+
+- AWSアカウントを持っている
+
+**接続する方法**
+
+以下の設定を書き足すと、リアルタイムなIoT情報と連携できるようになります
+
+```jsx
+  // Viewportを定義する
+  const viewport = useMemo(() => {
+    return {
+      // 10m = 過去10分以内の状態を参照する
+      duration: "10m",
+    };
+  }, []);
+  // データソースを読み込む
+  const queries: any[] = useMemo(
+    () => [
+      twinmaker.query.timeSeriesData({
+        entityId: "AWS TwinMakerのエンティティID",
+        componentName: "AWS TwinMakerのコンポーネント名",
+        properties: [
+          { propertyName: "コンポーネントのプロパティ名" },
+        ],
+      }),
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+// 中略
+      <SceneViewer
+      // 中略
+        queries={queries} // SceneViewerにクエリを追加
+        viewport={viewport} // SceneViewerにviewportを追加
+      />
+```
 
 ---
