@@ -214,6 +214,16 @@ export class SceneController {
   }
 
   /**
+   * 上書きしたオブジェクトを取得する
+   */
+  getObject(key: string) {
+    if (key in this._objects) {
+      return this._objects[key];
+    }
+    return undefined;
+  }
+
+  /**
    * 実行する(0.5秒に1回実行する)
    * Reactの変数は再生成で破棄されるため、必要に応じてRedux管理できるよう、コアの状態管理変数はインスタンス外に出しておく
    *

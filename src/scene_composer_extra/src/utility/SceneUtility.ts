@@ -97,7 +97,6 @@ export function useSceneController(
   const { dataInput, dataBindingTemplate, getSceneRuleMapById } = useStore(
     composerId
   )((state) => state);
-
   /** コントローラを作成する */
   const controller = useMemo(
     () => factory(composerId, new ReplaceContext(getObject3DBySceneNodeRef)),
