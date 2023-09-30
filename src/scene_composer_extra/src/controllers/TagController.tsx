@@ -22,6 +22,7 @@ import {
 } from "recharts";
 import React from "react";
 import { ImageModelWrapper } from "../objects/model/ImageModelWrapper";
+import { TextureAtrasVideoWrapper } from "../objects/model/TextureAtrasVideoWrapper";
 
 /**
  * タグを検索する
@@ -233,6 +234,24 @@ export class ReplaceTag {
     if (tag) {
       tag.visible = false;
       return new ImageModelWrapper(
+        this._rootScene,
+        tag.position,
+        tag.rotation,
+        tag.scale,
+        this._anchor
+      );
+    }
+    return undefined;
+  }
+
+  /**
+   * テクスチャアトラスを使ったビデオに置き換える
+   */
+  get toTextureAtrasVideo() {
+    const tag = this._tag;
+    if (tag) {
+      tag.visible = false;
+      return new TextureAtrasVideoWrapper(
         this._rootScene,
         tag.position,
         tag.rotation,
