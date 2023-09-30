@@ -19,8 +19,8 @@ export interface MeshUiTextParameter extends ModelParameterBase {
   font?: FontData;
 }
 export class MeshUiTextWrapper extends ExtraObjectWrapper {
-  private _text?: ThreeMeshUI.Text;
-  private _onAnimatingEvent?: (text: ThreeMeshUI.Text) => void;
+  private _content?: any;
+  private _onAnimatingEvent?: (text: MeshUiTextWrapper) => void;
 
   /**
    * 初期化する
@@ -58,21 +58,46 @@ export class MeshUiTextWrapper extends ExtraObjectWrapper {
     const text = new ThreeMeshUI.Text({ content: parameter.content });
     container.add(text);
 
-    this._text = text;
+    this._content = text;
 
     return this;
   }
 
+  /**
+   * コンテンツを更新する
+   */
+  setContent(content: string) {
+    // 設定先のコンテンツがなければ処理を終了する
+    if (this._content === undefined) return;
+    // データを更新する
+    if (typeof content === "string") {
+      // テキストコンテンツを更新する
+      this._content.set({
+        content,
+      });
+    }
+  }
+
+  /**
+   * コンテンツを直接設定する
+   */
+  set(jsonData: any) {
+    // 設定先のコンテンツがなければ処理を終了する
+    if (this._content === undefined) return;
+    // データを更新する
+    this._content.set(jsonData);
+  }
+
   /** イベント: アニメーションループが実行された */
-  onAnimating(animatingEvent: (text: ThreeMeshUI.Text) => void) {
+  onAnimating(animatingEvent: (text: MeshUiTextWrapper) => void) {
     this._onAnimatingEvent = animatingEvent;
     return this;
   }
 
   /** アニメーションループ */
   executeAnimationLoop(parameter: AnimationParameter) {
-    if (this._onAnimatingEvent && this._text) {
-      this._onAnimatingEvent(this._text);
+    if (this._onAnimatingEvent && this._content !== undefined) {
+      this._onAnimatingEvent(this);
     }
   }
 }

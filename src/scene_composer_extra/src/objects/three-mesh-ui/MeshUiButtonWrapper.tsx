@@ -5,7 +5,7 @@ import {
 import ThreeMeshUI from "three-mesh-ui";
 import { AnimationParameter } from "../../types/DataType";
 import { getState } from "../../utility/SceneUtility";
-import { Raycaster, Color, Camera } from "three/src/Three";
+import { Raycaster, Color, Camera, TextureLoader } from "three/src/Three";
 import { FontData } from "../../types/MeshUiFont";
 
 export interface MeshUiButtonColor {
@@ -13,9 +13,13 @@ export interface MeshUiButtonColor {
   fontColor: Color;
 }
 
+export interface MeshUiButtonFileContents {
+  filePath: string;
+}
+
 export interface MeshUiButtonParameter extends ModelParameterBase {
-  // テキスト
-  content: string;
+  // テキスト, またはコンテンツ
+  content: string | MeshUiButtonFileContents;
   // 状態ごとの表示スタイル
   stateStyle: { [style: string]: MeshUiButtonColor };
   // ボタンの幅
@@ -29,9 +33,9 @@ export class MeshUiButtonWrapper extends ExtraObjectWrapper {
   private _camera: Camera | null = null;
   private _objsToTest: Array<ThreeMeshUI.Block> = [];
 
-  private _text?: ThreeMeshUI.Text;
+  private _content?: any;
   private _onClickEvent?: () => void;
-  private _onAnimatingEvent?: (text: ThreeMeshUI.Text) => void;
+  private _onAnimatingEvent?: (text: MeshUiButtonWrapper) => void;
 
   /**
    * 初期化する
@@ -75,8 +79,15 @@ export class MeshUiButtonWrapper extends ExtraObjectWrapper {
       margin: 0.02,
       borderRadius: 0.075,
     });
-    const text = new ThreeMeshUI.Text({ content: parameter.content });
-    button.add(text);
+
+    /** コンテンツの内容に合わせてデータを設定する */
+    if (typeof parameter.content === "string") {
+      this._content = new ThreeMeshUI.Text({});
+    } else {
+      this._content = new ThreeMeshUI.InlineBlock({});
+    }
+    this.setContent(parameter.content);
+    button.add(this._content);
 
     /**
      * 状態変更イベントを登録する
@@ -112,7 +123,6 @@ export class MeshUiButtonWrapper extends ExtraObjectWrapper {
 
     container.add(button);
     that._objsToTest.push(button);
-    this._text = text;
 
     /** カメラを参照する */
     const { camera } = getState(this._rootScene);
@@ -128,9 +138,54 @@ export class MeshUiButtonWrapper extends ExtraObjectWrapper {
   }
 
   /** イベント: アニメーションループが実行された */
-  onAnimating(animatingEvent: (text: ThreeMeshUI.Text) => void) {
+  onAnimating(animatingEvent: (text: MeshUiButtonWrapper) => void) {
     this._onAnimatingEvent = animatingEvent;
     return this;
+  }
+
+  get content() {
+    // 設定先のコンテンツがなければ処理を終了する
+    if (this._content === undefined) return;
+    try {
+      // コンテンツを取得する
+      return this._content.content;
+    } catch {
+      // 取得できないのならundefinedを返す
+      return undefined;
+    }
+  }
+
+  /**
+   * コンテンツを更新する
+   */
+  setContent(content: string | MeshUiButtonFileContents) {
+    // 設定先のコンテンツがなければ処理を終了する
+    if (this._content === undefined) return;
+    // データを更新する
+    if (typeof content === "string") {
+      // テキストコンテンツを更新する
+      this._content.set({
+        content,
+      });
+    } else {
+      // テクスチャ画像を更新する
+      const loader = new TextureLoader();
+      loader.loadAsync(content.filePath).then((texture) => {
+        this._content.set({
+          backgroundTexture: texture,
+        });
+      });
+    }
+  }
+
+  /**
+   * コンテンツを直接設定する
+   */
+  set(jsonData: any) {
+    // 設定先のコンテンツがなければ処理を終了する
+    if (this._content === undefined) return;
+    // データを更新する
+    this._content.set(jsonData);
   }
 
   /** アニメーションループ */
@@ -139,8 +194,8 @@ export class MeshUiButtonWrapper extends ExtraObjectWrapper {
       parameter.raycaster.setFromCamera(parameter.mouse, this._camera);
       this.raycast(parameter.raycaster, parameter.isSelect);
     }
-    if (this._onAnimatingEvent && this._text) {
-      this._onAnimatingEvent(this._text);
+    if (this._onAnimatingEvent && this._content !== undefined) {
+      this._onAnimatingEvent(this);
     }
   }
 
