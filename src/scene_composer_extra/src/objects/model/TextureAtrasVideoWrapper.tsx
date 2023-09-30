@@ -29,7 +29,7 @@ export interface TextureAtrasVideoParameter extends ModelParameterBase {
   width: number;
   // 画像の高さ
   height: number;
-  //
+  // アニメーションの実行速度：0でアニメーションしない
   fps?: number;
 }
 
@@ -44,7 +44,7 @@ export class TextureAtrasVideoWrapper extends ExtraObjectWrapper {
   private _atras: AtrasData[] = [];
   private _atrasIndex: number = 0;
 
-  private _fps: number = 20;
+  private _fps: number = 0;
 
   private _clock?: Clock;
 
@@ -106,7 +106,7 @@ export class TextureAtrasVideoWrapper extends ExtraObjectWrapper {
     this._atras = parameter.atras;
 
     // フレームレートを設定する
-    this._fps = parameter.fps ?? 20;
+    this._fps = parameter.fps ?? 0;
 
     this._clock = new Clock();
 
@@ -162,6 +162,11 @@ export class TextureAtrasVideoWrapper extends ExtraObjectWrapper {
    * @param imagePath 画像のパス
    */
   setImage(imagePath: string) {
+    // 古いテクスチャを破棄する
+    if (this._texture !== undefined) {
+      this._texture.dispose();
+      this._texture = undefined;
+    }
     // ローダーを作成する
     const loader = new TextureLoader();
     const that = this;
@@ -177,7 +182,7 @@ export class TextureAtrasVideoWrapper extends ExtraObjectWrapper {
   /** アニメーションループ */
   executeAnimationLoop(parameter: AnimationParameter) {
     // アニメーションの状態を更新
-    if (this._clock) {
+    if (this._clock && this._fps >= 1) {
       const oldTime = this._clock.oldTime;
       const delta = this._clock.getDelta();
       const threash = 1.0 / this._fps;
