@@ -58,7 +58,7 @@ export class HTMLModelWrapper extends ExtraObjectWrapper {
     /** 位置を元のタグの位置に合わせる */
     this.applyAttitude(website, parameter);
     /** 画面に配置する */
-    this._rootScene.add(website);
+    this.add(website);
 
     return this;
   }

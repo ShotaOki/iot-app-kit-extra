@@ -68,7 +68,7 @@ export class MeshUiButtonWrapper extends ExtraObjectWrapper {
     /** 位置を元のタグの位置に合わせる */
     this.applyAttitude(container, parameter);
     /** シーンに配置する */
-    this._rootScene.add(container);
+    this.add(container);
 
     /** ボタンを作成する */
     const button: any = new ThreeMeshUI.Block({

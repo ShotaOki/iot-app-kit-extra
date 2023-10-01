@@ -192,7 +192,7 @@ export class SceneController {
         model?.render(rootScene, camera);
 
         Object.keys(that._objects).forEach((k) => {
-          that._objects[k].executeAnimationLoop({
+          that._objects[k].callAnimationLoop({
             mouse: that._mouse,
             isSelect: that._selectState,
             raycaster: that._raycaster,

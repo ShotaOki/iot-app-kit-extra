@@ -23,6 +23,7 @@ import {
 import React from "react";
 import { ImageModelWrapper } from "../objects/model/ImageModelWrapper";
 import { TextureAtrasVideoWrapper } from "../objects/model/TextureAtrasVideoWrapper";
+import { GroupWrapper } from "../objects/group/GroupWrapper";
 
 /**
  * タグを検索する
@@ -124,6 +125,24 @@ export class ReplaceTag {
     this._rootScene = rootScene;
     this._anchor = anchor;
     this._tag = tag;
+  }
+
+  /**
+   * TwinMakerのタグオブジェクトをグループに置き換える
+   */
+  get toGroup() {
+    const tag = this._tag;
+    if (tag) {
+      tag.visible = false;
+      return new GroupWrapper(
+        this._rootScene,
+        tag.position,
+        tag.rotation,
+        tag.scale,
+        this._anchor
+      );
+    }
+    return undefined;
   }
 
   /**

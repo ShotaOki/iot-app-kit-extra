@@ -42,7 +42,7 @@ export class ImageModelWrapper extends ExtraObjectWrapper {
     this.applyAttitude(imageBlock, parameter);
 
     /** 画面に配置する */
-    this._rootScene.add(imageBlock);
+    this.add(imageBlock);
 
     // 画像を表示する
     this.setImage(parameter.imagePath);

@@ -42,7 +42,7 @@ export class GLTFModelWrapper extends ExtraObjectWrapper {
       model.receiveShadow = true;
 
       // 読み込んだMMDモデルを表示する
-      this._rootScene.add(model);
+      this.add(model);
 
       // 状態を初期化する
       that.stateChange(SystemLoadingStatus.Init);

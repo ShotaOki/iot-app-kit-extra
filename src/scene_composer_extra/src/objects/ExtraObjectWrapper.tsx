@@ -26,6 +26,8 @@ export class ExtraObjectWrapper {
   protected _flagLoaded: boolean;
   // ルートシーン
   protected _rootScene;
+  // オブジェクト
+  protected _object: Object3D | undefined;
 
   constructor(
     rootScene: Scene,
@@ -41,11 +43,23 @@ export class ExtraObjectWrapper {
     this._anchor = anchor;
     this._state = "";
     this._flagLoaded = false;
+    this._object = undefined;
+  }
+
+  /** 子オブジェクトを追加する */
+  protected add(child: Object3D) {
+    this._object = child;
+    this._rootScene.add(child);
   }
 
   /** 読み込みの完了フラグ */
   get isLoaded() {
     return this._flagLoaded;
+  }
+
+  /** Object3Dのオブジェクトを返却する */
+  get object() {
+    return this._object;
   }
 
   /**
@@ -76,6 +90,11 @@ export class ExtraObjectWrapper {
 
   /** アニメーションループ */
   executeAnimationLoop(parameter: AnimationParameter) {}
+
+  /** アニメーションループ */
+  callAnimationLoop(parameter: AnimationParameter) {
+    this.executeAnimationLoop(parameter);
+  }
 
   /**
    * 状態を変更する

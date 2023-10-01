@@ -100,7 +100,7 @@ export class TextureAtrasVideoWrapper extends ExtraObjectWrapper {
     this.applyAttitude(this._imageBlock, parameter);
 
     /** 画面に配置する */
-    this._rootScene.add(this._imageBlock);
+    this.add(this._imageBlock);
 
     // 表示データを設定する
     this._atras = parameter.atras;

@@ -52,7 +52,7 @@ export class MeshUiTextWrapper extends ExtraObjectWrapper {
     /** 位置を元のタグの位置に合わせる */
     this.applyAttitude(container, parameter);
     /** 画面に配置する */
-    this._rootScene.add(container);
+    this.add(container);
 
     /** テキストを作成する */
     const text = new ThreeMeshUI.Text({ content: parameter.content });

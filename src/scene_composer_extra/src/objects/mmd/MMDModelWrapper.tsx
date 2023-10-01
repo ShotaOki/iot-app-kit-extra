@@ -71,7 +71,7 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
       }
 
       // 読み込んだMMDモデルを表示する
-      this._rootScene.add(mesh);
+      this.add(mesh);
       this._mesh = mesh;
 
       // 状態を初期化する
