@@ -28,13 +28,16 @@ export class ExtraObjectWrapper {
   protected _rootScene;
   // オブジェクト
   protected _object: Object3D | undefined;
+  // オプション: 親オブジェクト（未設定であればルートシーンを親とする）
+  protected _parentObject: Object3D | undefined;
 
   constructor(
     rootScene: Scene,
     position: Vector3,
     rotate: Euler,
     scale: Vector3,
-    anchor: IAnchorComponent
+    anchor: IAnchorComponent,
+    parentObject?: Object3D
   ) {
     this._rootScene = rootScene;
     this._position = position;
@@ -44,12 +47,19 @@ export class ExtraObjectWrapper {
     this._state = "";
     this._flagLoaded = false;
     this._object = undefined;
+    this._parentObject = parentObject;
   }
 
   /** 子オブジェクトを追加する */
   protected add(child: Object3D) {
     this._object = child;
-    this._rootScene.add(child);
+    if (this._parentObject) {
+      // 親グループが設定されていれば、親グループに配置する
+      this._parentObject?.add(child);
+    } else {
+      // 親グループがなければ、ルートシーンに直接配置する
+      this._rootScene.add(child);
+    }
   }
 
   /** 読み込みの完了フラグ */

@@ -2,7 +2,7 @@ import {
   ExtraObjectWrapper,
   type ModelParameterBase,
 } from "../ExtraObjectWrapper";
-import { Euler, Vector3 } from "three/src/Three";
+import { Euler, Event, Object3D, Vector3 } from "three/src/Three";
 import {
   AnimationParameter,
   OverrideTagsParameter,
@@ -37,7 +37,10 @@ export class GroupWrapper extends ExtraObjectWrapper {
    * 子オブジェクトを初期化する
    * @param children
    */
-  protected updateChildren(children: OverrideTagsParameter) {
+  protected updateChildren(
+    children: OverrideTagsParameter,
+    groupParent: Object3D
+  ) {
     this._children = [];
     // シーンコントローラの更新通知イベントを実行: タグを上書きする
     const overrides = children;
@@ -48,7 +51,12 @@ export class GroupWrapper extends ExtraObjectWrapper {
         new ReplaceTag(
           this._rootScene,
           this._anchor,
-          new DummyTag(this._position, this._rotate, this._scale) as any
+          new DummyTag(
+            new Vector3(0, 0, 0),
+            new Euler(0, 0, 0),
+            new Vector3(1.0, 1.0, 1.0)
+          ) as any,
+          groupParent
         )
       );
       if (result) {
@@ -64,8 +72,13 @@ export class GroupWrapper extends ExtraObjectWrapper {
    * @returns
    */
   create(parameter: GroupParameter) {
+    // 親オブジェクトを設定、初期化する
+    const groupParent = new Object3D();
+    this.applyAttitude(groupParent, parameter);
+    this.add(groupParent);
     // 子オブジェクトを初期化する
-    this.updateChildren(parameter.children);
+    // 子オブジェクトは親オブジェクトの下に配置する
+    this.updateChildren(parameter.children, groupParent);
     return this;
   }
 
@@ -73,6 +86,7 @@ export class GroupWrapper extends ExtraObjectWrapper {
   executeAnimationLoop(parameter: AnimationParameter) {
     // アニメーションの状態を更新
     for (let child of this._children) {
+      // イベントは子オブジェクトに連携する
       child.executeAnimationLoop(parameter);
     }
   }

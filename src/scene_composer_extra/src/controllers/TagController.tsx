@@ -109,9 +109,14 @@ export class ReplaceContext {
 }
 
 export class ReplaceTag {
+  // カメラ、レンダリング情報を持ったシーンオブジェクト
   _rootScene: Scene;
+  // TwinMakerで管理されるタグの表示情報、アンカー情報
   _anchor: IAnchorComponent;
+  // オプション: TwinMakerタグの3Dオブジェクト情報
   _tag?: Object3D<Event>;
+  // オプション: 置き換え後のオブジェクトを配置するグループ
+  _parentGroup?: Object3D;
 
   /**
    * @param ref タグオブジェクトのRef ID
@@ -120,11 +125,13 @@ export class ReplaceTag {
   constructor(
     rootScene: Scene,
     anchor: IAnchorComponent,
-    tag?: Object3D<Event>
+    tag?: Object3D<Event>,
+    parentGroup?: Object3D
   ) {
     this._rootScene = rootScene;
     this._anchor = anchor;
     this._tag = tag;
+    this._parentGroup = parentGroup;
   }
 
   /**
@@ -139,7 +146,8 @@ export class ReplaceTag {
         tag.position,
         tag.rotation,
         tag.scale,
-        this._anchor
+        this._anchor,
+        this._parentGroup
       );
     }
     return undefined;
@@ -161,7 +169,8 @@ export class ReplaceTag {
         tag.position,
         tag.rotation,
         tag.scale,
-        this._anchor
+        this._anchor,
+        this._parentGroup
       );
     }
     return undefined;
@@ -181,7 +190,8 @@ export class ReplaceTag {
         tag.position,
         tag.rotation,
         tag.scale,
-        this._anchor
+        this._anchor,
+        this._parentGroup
       );
     }
     return undefined;
@@ -201,7 +211,8 @@ export class ReplaceTag {
         tag.position,
         tag.rotation,
         tag.scale,
-        this._anchor
+        this._anchor,
+        this._parentGroup
       );
     }
     return undefined;
@@ -221,7 +232,8 @@ export class ReplaceTag {
         tag.position,
         tag.rotation,
         tag.scale,
-        this._anchor
+        this._anchor,
+        this._parentGroup
       );
     }
     return undefined;
@@ -239,7 +251,8 @@ export class ReplaceTag {
         tag.position,
         tag.rotation,
         tag.scale,
-        this._anchor
+        this._anchor,
+        this._parentGroup
       );
     }
     return undefined;
@@ -257,7 +270,8 @@ export class ReplaceTag {
         tag.position,
         tag.rotation,
         tag.scale,
-        this._anchor
+        this._anchor,
+        this._parentGroup
       );
     }
     return undefined;
@@ -275,7 +289,8 @@ export class ReplaceTag {
         tag.position,
         tag.rotation,
         tag.scale,
-        this._anchor
+        this._anchor,
+        this._parentGroup
       );
     }
     return undefined;
@@ -293,7 +308,8 @@ export class ReplaceTag {
         tag.position,
         tag.rotation,
         tag.scale,
-        this._anchor
+        this._anchor,
+        this._parentGroup
       ).updateRachartsComponent(
         LineChart,
         <>
@@ -324,7 +340,8 @@ export class ReplaceTag {
         tag.position,
         tag.rotation,
         tag.scale,
-        this._anchor
+        this._anchor,
+        this._parentGroup
       ).updateRachartsComponent(
         BarChart,
         <>
