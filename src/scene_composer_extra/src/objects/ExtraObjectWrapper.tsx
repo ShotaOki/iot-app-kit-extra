@@ -11,6 +11,21 @@ export interface ModelParameterBase {
   angle?: number;
 }
 
+export interface ExtraObjectWrapperParameter {
+  // ルートシーン
+  rootScene: Scene;
+  // 表示位置
+  position: Vector3;
+  // 回転: 単位はDegree
+  rotate: Euler;
+  // 拡大縮小
+  scale: Vector3;
+  // オブジェクトの表示情報
+  anchor: IAnchorComponent;
+  // オプション: 親オブジェクト（未設定であればルートシーンを親とする）
+  parentObject?: Object3D;
+}
+
 export class ExtraObjectWrapper {
   // 表示位置
   protected _position: Vector3;
@@ -31,23 +46,16 @@ export class ExtraObjectWrapper {
   // オプション: 親オブジェクト（未設定であればルートシーンを親とする）
   protected _parentObject: Object3D | undefined;
 
-  constructor(
-    rootScene: Scene,
-    position: Vector3,
-    rotate: Euler,
-    scale: Vector3,
-    anchor: IAnchorComponent,
-    parentObject?: Object3D
-  ) {
-    this._rootScene = rootScene;
-    this._position = position;
-    this._rotate = rotate;
-    this._scale = scale;
-    this._anchor = anchor;
+  constructor(parameter: ExtraObjectWrapperParameter) {
+    this._rootScene = parameter.rootScene;
+    this._position = parameter.position;
+    this._rotate = parameter.rotate;
+    this._scale = parameter.scale;
+    this._anchor = parameter.anchor;
     this._state = "";
     this._flagLoaded = false;
     this._object = undefined;
-    this._parentObject = parentObject;
+    this._parentObject = parameter.parentObject;
   }
 
   /** 子オブジェクトを追加する */
