@@ -37,6 +37,7 @@ export class GroupWrapper extends MixinAnimation(ExtraObjectWrapper) {
   // 子オブジェクト
   protected _children: { [key: string]: ExtraObjectWrapper } = {};
   protected _animationController?: Object3D;
+  private _cameraState: string = "-";
 
   /**
    * 子オブジェクトを初期化する
@@ -102,6 +103,9 @@ export class GroupWrapper extends MixinAnimation(ExtraObjectWrapper) {
     });
   }
 
+  /** カメラの移動を通知する */
+  protected onMoveCamera() {}
+
   /**
    * 初期化する
    *
@@ -130,6 +134,8 @@ export class GroupWrapper extends MixinAnimation(ExtraObjectWrapper) {
     this._animationController = animationController;
     // アニメーションの実行変数を初期化する
     this.mixinAnimationInitialize();
+    // カメラの状態変数を確保する
+    this._cameraState = "-";
     return this;
   }
 
@@ -142,5 +148,10 @@ export class GroupWrapper extends MixinAnimation(ExtraObjectWrapper) {
     }
     // アニメーションを実行する
     this.executeAnimation(this._animationController);
+    // カメラが移動していれば通知する
+    if (this._cameraState != parameter.cameraState) {
+      this._cameraState = parameter.cameraState;
+      this.onMoveCamera();
+    }
   }
 }
