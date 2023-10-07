@@ -8,7 +8,7 @@ import {
   OverrideTagsParameter,
 } from "../../types/DataType";
 import { ReplaceTag } from "../../controllers/TagController";
-import { MixinAnimation } from "../../mixin/animation";
+import { MixinAnimation } from "../../mixin/MixinAnimation";
 
 export interface GroupParameter extends ModelParameterBase {
   // 子オブジェクトの一覧
