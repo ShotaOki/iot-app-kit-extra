@@ -17,4 +17,5 @@ export interface AnimationParameter {
   mouse: Vector2 | null;
   isSelect: boolean;
   raycaster: Raycaster;
+  cameraState: string;
 }

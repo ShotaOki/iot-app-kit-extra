@@ -191,11 +191,24 @@ export class SceneController {
         requestAnimationFrame(animate);
         model?.render(rootScene, camera);
 
+        // カメラの状態を文字列化する
+        let cameraState = "-";
+        try {
+          cameraState = camera.matrix.elements
+            .map((e) => e.toFixed(3))
+            .join("")
+            .replaceAll("-", "")
+            .replaceAll(".", "");
+        } catch {
+          cameraState = "-";
+        }
+
         Object.keys(that._objects).forEach((k) => {
           that._objects[k].callAnimationLoop({
             mouse: that._mouse,
             isSelect: that._selectState,
             raycaster: that._raycaster,
+            cameraState: cameraState,
           });
         });
 

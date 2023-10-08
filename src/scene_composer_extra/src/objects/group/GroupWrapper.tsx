@@ -2,12 +2,13 @@ import {
   ExtraObjectWrapper,
   type ModelParameterBase,
 } from "../ExtraObjectWrapper";
-import { Euler, Event, Object3D, Vector3 } from "three/src/Three";
+import { Euler, Object3D, Vector3 } from "three/src/Three";
 import {
   AnimationParameter,
   OverrideTagsParameter,
 } from "../../types/DataType";
 import { ReplaceTag } from "../../controllers/TagController";
+import { MixinAnimation } from "../../mixin/MixinAnimation";
 
 export interface GroupParameter extends ModelParameterBase {
   // 子オブジェクトの一覧
@@ -29,9 +30,16 @@ class DummyTag {
   }
 }
 
-export class GroupWrapper extends ExtraObjectWrapper {
+/**
+ * 複数のオブジェクトを一つのタグに紐づけるクラス
+ */
+export class GroupWrapper extends MixinAnimation(ExtraObjectWrapper) {
   // 子オブジェクト
-  protected _children: ExtraObjectWrapper[] = [];
+  protected _children: { [key: string]: ExtraObjectWrapper } = {};
+  protected _animationController?: Object3D;
+  private _cameraState: string = "-";
+  private _onMoveCameraEvent?: () => void;
+  private _visibleChildName: string[] = [];
 
   /**
    * 子オブジェクトを初期化する
@@ -41,7 +49,8 @@ export class GroupWrapper extends ExtraObjectWrapper {
     children: OverrideTagsParameter,
     groupParent: Object3D
   ) {
-    this._children = [];
+    this._children = {};
+    this._visibleChildName = [];
     // シーンコントローラの更新通知イベントを実行: タグを上書きする
     const overrides = children;
     // 上書き対象のオブジェクトをさらう
@@ -60,9 +69,57 @@ export class GroupWrapper extends ExtraObjectWrapper {
         )
       );
       if (result) {
-        this._children.push(result);
+        this._children[tag] = result;
+        this._visibleChildName.push(tag);
       }
     }
+  }
+
+  /** 子オブジェクトを参照する */
+  public getChild(key: string) {
+    if (key in this._children) {
+      return this._children[key];
+    }
+    return undefined;
+  }
+
+  /** キーに一致する子オブジェクトを表示、それ以外を隠す */
+  public showSingleChild(key: string) {
+    this._visibleChildName = [];
+    Object.keys(this._children).forEach((k) => {
+      const object = this._children[k].object;
+      if (object) {
+        if (k == key) {
+          object.visible = true;
+          this._visibleChildName.push(k);
+        } else {
+          object.visible = false;
+        }
+      }
+    });
+  }
+
+  /** 全ての子オブジェクトを表示する */
+  public showAllChild() {
+    this._visibleChildName = [];
+    Object.keys(this._children).forEach((k) => {
+      const object = this._children[k].object;
+      if (object) {
+        object.visible = true;
+        this._visibleChildName.push(k);
+      }
+    });
+  }
+
+  /** 子オブジェクトが表示中であればtrueを返す */
+  public isShow(key: string) {
+    return this._visibleChildName.includes(key);
+  }
+
+  /** カメラの移動を通知するイベントを登録する */
+  public onMoveCamera(event: () => void) {
+    this._onMoveCameraEvent = event;
+    return this;
   }
 
   /**
@@ -73,21 +130,46 @@ export class GroupWrapper extends ExtraObjectWrapper {
    */
   create(parameter: GroupParameter) {
     // 親オブジェクトを設定、初期化する
+    // 親オブジェクトの表示位置はタグに合わせる
     const groupParent = new Object3D();
     this.applyAttitude(groupParent, parameter);
     this.add(groupParent);
+    // アニメーションの管理コントローラを設定する
+    // 親オブジェクトに直接変形をかけるとレイアウトが崩れるため、
+    // アニメーション用のオブジェクトだけを切り出して作成する
+    const animationController = new Object3D();
+    // アニメーションの初期状態を設定する
+    animationController.position.set(0, 0, 0);
+    animationController.rotation.set(0, 0, 0);
+    animationController.scale.set(1, 1, 1);
+    groupParent.add(animationController);
     // 子オブジェクトを初期化する
     // 子オブジェクトは親オブジェクトの下に配置する
-    this.updateChildren(parameter.children, groupParent);
+    this.updateChildren(parameter.children, animationController);
+    // 変数に格納、初期化する
+    this._animationController = animationController;
+    // アニメーションの実行変数を初期化する
+    this.mixinAnimationInitialize();
+    // カメラの状態変数を確保する
+    this._cameraState = "-";
     return this;
   }
 
   /** アニメーションループ */
   executeAnimationLoop(parameter: AnimationParameter) {
     // アニメーションの状態を更新
-    for (let child of this._children) {
+    for (let key of Object.keys(this._children)) {
       // イベントは子オブジェクトに連携する
-      child.executeAnimationLoop(parameter);
+      this._children[key].executeAnimationLoop(parameter);
+    }
+    // アニメーションを実行する
+    this.executeAnimation(this._animationController);
+    // カメラが移動していれば通知する
+    if (this._cameraState != parameter.cameraState) {
+      this._cameraState = parameter.cameraState;
+      if (this._onMoveCameraEvent) {
+        this._onMoveCameraEvent();
+      }
     }
   }
 }
