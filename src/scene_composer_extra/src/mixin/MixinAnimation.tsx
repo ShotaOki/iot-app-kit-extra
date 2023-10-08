@@ -99,6 +99,14 @@ export function MixinAnimation<TBase extends Constructor>(Base: TBase) {
       this._animationHandlerEvent = undefined;
     }
 
+    /** 拡縮アニメーションの実行中であればtrueを返す */
+    get isScaleAnimating() {
+      if (this._scaleAnimation.speed >= ANIMATION_STATUS_START) {
+        return true;
+      }
+      return false;
+    }
+
     /** 拡縮アニメーションを開始する */
     public startScaleAnimation(
       handlerEvent: () => void,

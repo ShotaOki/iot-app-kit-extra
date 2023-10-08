@@ -38,6 +38,8 @@ export class GroupWrapper extends MixinAnimation(ExtraObjectWrapper) {
   protected _children: { [key: string]: ExtraObjectWrapper } = {};
   protected _animationController?: Object3D;
   private _cameraState: string = "-";
+  private _onMoveCameraEvent?: () => void;
+  private _visibleChildName: string[] = [];
 
   /**
    * 子オブジェクトを初期化する
@@ -48,6 +50,7 @@ export class GroupWrapper extends MixinAnimation(ExtraObjectWrapper) {
     groupParent: Object3D
   ) {
     this._children = {};
+    this._visibleChildName = [];
     // シーンコントローラの更新通知イベントを実行: タグを上書きする
     const overrides = children;
     // 上書き対象のオブジェクトをさらう
@@ -67,6 +70,7 @@ export class GroupWrapper extends MixinAnimation(ExtraObjectWrapper) {
       );
       if (result) {
         this._children[tag] = result;
+        this._visibleChildName.push(tag);
       }
     }
   }
@@ -81,11 +85,13 @@ export class GroupWrapper extends MixinAnimation(ExtraObjectWrapper) {
 
   /** キーに一致する子オブジェクトを表示、それ以外を隠す */
   public showSingleChild(key: string) {
+    this._visibleChildName = [];
     Object.keys(this._children).forEach((k) => {
       const object = this._children[k].object;
       if (object) {
         if (k == key) {
           object.visible = true;
+          this._visibleChildName.push(k);
         } else {
           object.visible = false;
         }
@@ -95,16 +101,26 @@ export class GroupWrapper extends MixinAnimation(ExtraObjectWrapper) {
 
   /** 全ての子オブジェクトを表示する */
   public showAllChild() {
+    this._visibleChildName = [];
     Object.keys(this._children).forEach((k) => {
       const object = this._children[k].object;
       if (object) {
         object.visible = true;
+        this._visibleChildName.push(k);
       }
     });
   }
 
-  /** カメラの移動を通知する */
-  protected onMoveCamera() {}
+  /** 子オブジェクトが表示中であればtrueを返す */
+  public isShow(key: string) {
+    return this._visibleChildName.includes(key);
+  }
+
+  /** カメラの移動を通知するイベントを登録する */
+  public onMoveCamera(event: () => void) {
+    this._onMoveCameraEvent = event;
+    return this;
+  }
 
   /**
    * 初期化する
@@ -151,7 +167,9 @@ export class GroupWrapper extends MixinAnimation(ExtraObjectWrapper) {
     // カメラが移動していれば通知する
     if (this._cameraState != parameter.cameraState) {
       this._cameraState = parameter.cameraState;
-      this.onMoveCamera();
+      if (this._onMoveCameraEvent) {
+        this._onMoveCameraEvent();
+      }
     }
   }
 }
