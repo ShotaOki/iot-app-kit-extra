@@ -19,9 +19,11 @@
   "types": "./dist/es/index.d.ts",
   "scripts": {
     "build": "npm run build:es && npm run build:cjs && npm run copy:config",
+    "build:wsl": "npm run build:es && npm run build:cjs && npm run copy:wslconfig",
     "build:es": "tsc -p ./tsconfig.json --outDir ../../package/scene_composer_extra/dist/es",
     "build:cjs": "tsc -p ./tsconfig.json --outDir ../../package/scene_composer_extra/dist/cjs --module CommonJS",
     "copy:config": "copy package.json ..\\..\\package\\scene_composer_extra\\package.json",
+    "copy:wslconfig": "cp package.json ../../package/scene_composer_extra/package.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "files": [

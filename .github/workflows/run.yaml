@@ -1,0 +1,28 @@
+name: update-test-modules
+on: [workflow_dispatch]
+jobs:
+  update-test-module:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18.17.1"
+      - name: Build package
+        working-directory: src/scene_composer_extra
+        run: |
+          npm install --legacy-peer-deps
+          npm run build:wsl
+      - name: Build modules
+        working-directory: src/scene_composer_extra
+        run: |
+          npm install --legacy-peer-deps
+          npm run build:wsl
+      - name: Dependency to current repository
+        working-directory: examples/typescript-simple
+        run: |
+          sed -i 's/"@iak-extra\/scene-composer-extra.*$/"@iak-extra\/scene-composer-extra": "file:..\/..\/package\/scene_composer_extra",/g' package.json
+          npm install --legacy-peer-deps
+          npm run build
