@@ -1,11 +1,4 @@
-import {
-  Raycaster,
-  Vector2,
-  AmbientLight,
-  Object3D,
-  Event,
-  Scene,
-} from "three/src/Three";
+import { AmbientLight, Object3D, Event, Scene } from "three/src/Three";
 import { ISceneNodeInternal } from "@iot-app-kit/scene-composer/dist/src/store";
 import {
   findRootScene,
@@ -26,15 +19,14 @@ import {
 import { ReplaceContext, searchTag } from "./TagController";
 import { SystemLoadingStatus } from "../types/DataType";
 import ThreeMeshUI from "three-mesh-ui";
-import { HTMLModelWrapper } from "../objects/html/HTMLModelWrapper";
-import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
+import { MixinMouseInput } from "./input/MixinMouseInput";
 
 export enum SceneControllerState {
   Initialize,
   Active,
 }
 
-export class SceneController {
+export class SceneController extends MixinMouseInput(Object) {
   // コンポーザーID
   private _composerId: string;
   // コンテキスト
@@ -43,37 +35,18 @@ export class SceneController {
   private _interface: ISceneFieldInterface;
   // Tagを置き換えたあとのオブジェクト管理インスタンス
   private _objects: { [key: string]: ExtraObjectWrapper };
-  // マウスクリック位置
-  private _mouse: Vector2 | null;
-  // レイキャスト
-  private _raycaster: Raycaster;
-  // 選択状態
-  private _selectState: boolean;
-  // ウィンドウの幅と高さ
-  private _windowWidth: number;
-  private _windowHeight: number;
-  private _windowTop: number;
-  private _windowLeft: number;
-  // CSS3DRenderer
-  private _css3DRenderer: CSS3DRenderer;
 
   constructor(
     composeId: string,
     context: ReplaceContext,
     sceneInterface: ISceneFieldInterface
   ) {
+    super();
     this._composerId = composeId;
     this._context = context;
     this._interface = sceneInterface;
     this._objects = {};
-    this._raycaster = new Raycaster();
-    this._selectState = false;
-    this._mouse = null;
-    this._windowWidth = window.innerWidth;
-    this._windowHeight = window.innerHeight;
-    this._windowTop = 0;
-    this._windowLeft = 0;
-    this._css3DRenderer = new CSS3DRenderer();
+    this.initiate();
   }
 
   private searchRootScene(
@@ -94,38 +67,6 @@ export class SceneController {
     return undefined;
   }
 
-  private setupPointerEvent() {
-    window.addEventListener("pointermove", (event) => {
-      this._mouse = new Vector2();
-      const x = event.clientX - this._windowLeft;
-      const y = event.clientY - this._windowTop;
-      this._mouse.x = (x / this._windowWidth) * 2 - 1;
-      this._mouse.y = -(y / this._windowHeight) * 2 + 1;
-    });
-
-    window.addEventListener("pointerdown", () => {
-      this._selectState = true;
-    });
-
-    window.addEventListener("pointerup", () => {
-      this._selectState = false;
-    });
-
-    window.addEventListener("touchstart", (event) => {
-      this._selectState = true;
-      this._mouse = new Vector2();
-      const x = event.touches[0].clientX - this._windowLeft;
-      const y = event.touches[0].clientY - this._windowTop;
-      this._mouse.x = (x / this._windowWidth) * 2 - 1;
-      this._mouse.y = -(y / this._windowHeight) * 2 + 1;
-    });
-
-    window.addEventListener("touchend", () => {
-      this._selectState = false;
-      this._mouse = null;
-    });
-  }
-
   /**
    * シーンの状態を更新する
    * @param current
@@ -139,52 +80,9 @@ export class SceneController {
       const { gl, camera } = getState(rootScene);
       setupSceneForMMD(gl);
       // 3Dキャンバスの表示位置を参照する
-      const canvasList = document.querySelectorAll("canvas");
-      let top = 0;
-      let left = 0;
-      let width = window.innerWidth;
-      let height = window.innerHeight;
-      canvasList.forEach((item) => {
-        if (item.dataset.engine && item.dataset.engine.startsWith("three.js")) {
-          // 画面サイズを取得する
-          const rect = item.getBoundingClientRect();
-          top = rect.top;
-          left = rect.left;
-          width = rect.width;
-          height = rect.height;
-          // リサイズを監視する
-          const observer = new ResizeObserver((_) => {
-            // リサイズ後の画面サイズを再取得する
-            const contentRect = item.getBoundingClientRect();
-            this._windowTop = contentRect.top;
-            this._windowLeft = contentRect.left;
-            this._windowWidth = contentRect.width;
-            this._windowHeight = contentRect.height;
-            HTMLModelWrapper.updateSize(
-              this._css3DRenderer,
-              contentRect.width,
-              contentRect.height,
-              contentRect.top,
-              contentRect.left
-            );
-          });
-          observer.observe(item);
-        }
-      });
-      this._windowTop = top;
-      this._windowLeft = left;
-      this._windowWidth = width;
-      this._windowHeight = height;
+      const model = this.setupCanvas();
       // ボタン操作のイベントを設定する
       this.setupPointerEvent();
-      // CSS3 HTMLのレンダラを参照する
-      const model = HTMLModelWrapper.initiate(
-        this._css3DRenderer,
-        width,
-        height,
-        top,
-        left
-      );
       // アニメーションループを実行する
       const that = this;
       function animate() {
@@ -203,14 +101,14 @@ export class SceneController {
           cameraState = "-";
         }
 
+        // マウスイベントを通知する
         Object.keys(that._objects).forEach((k) => {
           that._objects[k].callAnimationLoop({
-            mouse: that._mouse,
-            isSelect: that._selectState,
-            raycaster: that._raycaster,
+            ...that.currentEvent,
             cameraState: cameraState,
           });
         });
+        that.next();
 
         // アニメーションの状態を更新
         ThreeMeshUI.update();
