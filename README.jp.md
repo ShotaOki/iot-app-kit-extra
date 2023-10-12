@@ -17,9 +17,9 @@ IoT App Kit に強く依存します。
 
 https://github.com/awslabs/iot-app-kit
 
-サンプル URL はこちらです
+デモのサンプル URL はこちらです
 
-https://pub-5e7ce27e493044a6ad7b1d927d05320c.r2.dev/index.html
+https://shotaoki.github.io/iot-app-kit-extra-document/?content=demo
 
 ## ドキュメント
 
