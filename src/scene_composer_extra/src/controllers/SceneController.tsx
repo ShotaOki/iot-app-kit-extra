@@ -20,6 +20,7 @@ import { ReplaceContext, searchTag } from "./TagController";
 import { SystemLoadingStatus } from "../types/DataType";
 import ThreeMeshUI from "three-mesh-ui";
 import { MixinMouseInput } from "./input/MixinMouseInput";
+import { Primitive } from "@iot-app-kit/core";
 
 export enum SceneControllerState {
   Initialize,
@@ -193,7 +194,7 @@ export class SceneController extends MixinMouseInput(Object) {
     dataInput: IDataInput | undefined,
     dataBindingTemplate: IDataBindingTemplate | undefined,
     getSceneRuleMapById: (
-      id?: string | undefined
+      id?: string | unknown
     ) => Readonly<IRuleBasedMap | undefined>
   ) {
     // 自身が管理するExtraObjectWrapperをすべてさらう
@@ -201,7 +202,7 @@ export class SceneController extends MixinMouseInput(Object) {
       const wrapper = this._objects[tag];
       if (wrapper && wrapper._anchor) {
         // SiteWiseのクラウド側の最新値を参照する
-        const values: Record<string, unknown> = dataBindingValuesProvider(
+        const values: Record<string, Primitive> = dataBindingValuesProvider(
           dataInput,
           wrapper._anchor.valueDataBinding,
           dataBindingTemplate
@@ -215,7 +216,7 @@ export class SceneController extends MixinMouseInput(Object) {
         );
         // 色変更ルールにもとづいた、現在の状態を適用する
         if (ruleTarget) {
-          wrapper.stateChange(ruleTarget);
+          wrapper.stateChange(ruleTarget.target);
         }
       }
     }
