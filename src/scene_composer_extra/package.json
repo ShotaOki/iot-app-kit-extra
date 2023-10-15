@@ -38,8 +38,8 @@
   },
   "homepage": "https://shotaoki.github.io/iot-app-kit-extra/",
   "dependencies": {
-    "@iot-app-kit/scene-composer": "^9.1.0",
-    "@iot-app-kit/source-iottwinmaker": "^9.1.0",
+    "@iot-app-kit/scene-composer": "^8.1.0",
+    "@iot-app-kit/source-iottwinmaker": "^8.1.0",
     "@react-three/drei": "^9.74.12",
     "@react-three/fiber": "^8.13.3",
     "jsx-runtime": "^1.2.0",
