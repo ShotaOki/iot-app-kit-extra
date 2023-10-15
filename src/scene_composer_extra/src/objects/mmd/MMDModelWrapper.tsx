@@ -12,6 +12,7 @@ import {
 import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader";
 import { MMDAnimationHelper } from "three/examples/jsm/animation/MMDAnimationHelper";
 import { AnimationParameter, SystemLoadingStatus } from "../../types/DataType";
+import { NoLightingShader } from "../../shader/NoLightingShader";
 
 export interface MMDModelParameter extends ModelParameterBase {
   // MMDモデルのファイルパス
@@ -62,12 +63,14 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
       mesh.castShadow = true;
       mesh.receiveShadow = true;
 
-      // 発光設定、アウトライン設定をTwinMakerに合わせて補正する
+      // TwinMakerに合わせてシェーダを補正する
       for (let m of mesh.material as Material[]) {
-        let ma: any = m;
-        ma.emissive.multiplyScalar(0.1);
-        ma.userData.outlineParameters.thickness = 0.001;
-        ma.needsUpdate = true;
+        // TwinMakerが明るすぎて白飛びするため、MMDに光源の影響を受けないシェーダを使う
+        // ※MotionIndicatorComponent用のシェーダを転用したもの
+        m.onBeforeCompile = (shader) => {
+          shader.fragmentShader = NoLightingShader;
+        };
+        m.needsUpdate = true;
       }
 
       // 読み込んだMMDモデルを表示する

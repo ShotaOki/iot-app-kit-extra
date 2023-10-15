@@ -1,10 +1,6 @@
-import { AmbientLight, Object3D, Event, Scene } from "three/src/Three";
+import { Object3D, Event, Scene } from "three/src/Three";
 import { ISceneNodeInternal } from "@iot-app-kit/scene-composer/dist/src/store";
-import {
-  findRootScene,
-  getState,
-  setupSceneForMMD,
-} from "../utility/SceneUtility";
+import { findRootScene, getState } from "../utility/SceneUtility";
 import { ISceneFieldInterface } from "../types/ISceneField";
 import { ExtraObjectWrapper } from "../objects/ExtraObjectWrapper";
 import {
@@ -75,11 +71,8 @@ export class SceneController extends MixinMouseInput(Object) {
    */
   private onUpdateScene(current: SceneControllerState, rootScene: Scene) {
     if (current === SceneControllerState.Initialize) {
-      // ライティングを設定する
-      rootScene.add(new AmbientLight(0xffffff, 0.7));
       // RendererをMMDに合わせて最適化する
-      const { gl, camera } = getState(rootScene);
-      setupSceneForMMD(gl);
+      const { camera } = getState(rootScene);
       // 3Dキャンバスの表示位置を参照する
       const model = this.setupCanvas();
       // ボタン操作のイベントを設定する
