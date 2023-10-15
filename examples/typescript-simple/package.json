@@ -6,11 +6,11 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@iak-extra/local-server-proxy": "^0.1.1",
     "@iak-extra/scene-composer-extra": "^0.2.9",
-    "@iot-app-kit/components": "^7.3.1",
-    "@iot-app-kit/react-components": "^7.1.1",
-    "@iot-app-kit/scene-composer": "^3.4.0",
-    "@iot-app-kit/source-iottwinmaker": "^7.1.1",
-    "@react-three/drei": "^9.44.1",
+    "@iot-app-kit/components": "^9.0.0",
+    "@iot-app-kit/react-components": "^9.0.0",
+    "@iot-app-kit/scene-composer": "^9.0.0",
+    "@iot-app-kit/source-iottwinmaker": "^9.0.0",
+    "@react-three/drei": "^9.74.12",
     "@react-three/fiber": "^8.13.3",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
@@ -27,8 +27,8 @@
     "react-scripts": "5.0.1",
     "recharts": "^2.8.0",
     "sass": "^1.63.3",
-    "three": "^0.139.0",
-    "three-mesh-bvh": "^0.5.15",
+    "three": "^0.146.0",
+    "three-mesh-bvh": "^0.5.23",
     "three-mesh-ui": "^6.5.4",
     "three-stdlib": "^2.18.1",
     "typescript": "^4.9.5",
@@ -56,7 +56,7 @@
     ]
   },
   "devDependencies": {
-    "@types/three": "^0.139.0",
+    "@types/three": "^0.146.0",
     "react-app-rewired": "^2.2.1"
   }
 }
