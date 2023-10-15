@@ -1,12 +1,4 @@
-import {
-  Object3D,
-  Event,
-  PCFSoftShadowMap,
-  LinearEncoding,
-  LinearToneMapping,
-  WebGLRenderer,
-  Scene,
-} from "three/src/Three";
+import { Object3D, Event, Scene } from "three/src/Three";
 import { RootState } from "@react-three/fiber";
 import { useStore } from "@iot-app-kit/scene-composer/dist/src/store";
 import {
@@ -36,17 +28,6 @@ export function findRootScene(target: Object3D<Event> | undefined) {
 export function getState(rootScene: Scene): RootState {
   const d3fScene: any = rootScene;
   return d3fScene.__r3f.root.getState() as RootState;
-}
-
-/**
- * TwinMakerのシーン描画(色の描画)をMMDに合わせて調整する
- */
-export function setupSceneForMMD(gl: WebGLRenderer) {
-  gl.shadowMap.enabled = true;
-  gl.shadowMap.type = PCFSoftShadowMap;
-  // LinearEncodingにすると色彩が強くなる
-  gl.outputEncoding = LinearEncoding;
-  gl.toneMapping = LinearToneMapping;
 }
 
 /**

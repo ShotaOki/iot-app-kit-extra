@@ -1,10 +1,6 @@
-import { AmbientLight, Object3D, Event, Scene } from "three/src/Three";
+import { Object3D, Event, Scene } from "three/src/Three";
 import { ISceneNodeInternal } from "@iot-app-kit/scene-composer/dist/src/store";
-import {
-  findRootScene,
-  getState,
-  setupSceneForMMD,
-} from "../utility/SceneUtility";
+import { findRootScene, getState } from "../utility/SceneUtility";
 import { ISceneFieldInterface } from "../types/ISceneField";
 import { ExtraObjectWrapper } from "../objects/ExtraObjectWrapper";
 import {
@@ -20,6 +16,7 @@ import { ReplaceContext, searchTag } from "./TagController";
 import { SystemLoadingStatus } from "../types/DataType";
 import ThreeMeshUI from "three-mesh-ui";
 import { MixinMouseInput } from "./input/MixinMouseInput";
+import { Primitive } from "@iot-app-kit/core";
 
 export enum SceneControllerState {
   Initialize,
@@ -74,11 +71,8 @@ export class SceneController extends MixinMouseInput(Object) {
    */
   private onUpdateScene(current: SceneControllerState, rootScene: Scene) {
     if (current === SceneControllerState.Initialize) {
-      // ライティングを設定する
-      rootScene.add(new AmbientLight(0xffffff, 0.7));
       // RendererをMMDに合わせて最適化する
-      const { gl, camera } = getState(rootScene);
-      setupSceneForMMD(gl);
+      const { camera } = getState(rootScene);
       // 3Dキャンバスの表示位置を参照する
       const model = this.setupCanvas();
       // ボタン操作のイベントを設定する
@@ -193,7 +187,7 @@ export class SceneController extends MixinMouseInput(Object) {
     dataInput: IDataInput | undefined,
     dataBindingTemplate: IDataBindingTemplate | undefined,
     getSceneRuleMapById: (
-      id?: string | undefined
+      id?: string | unknown
     ) => Readonly<IRuleBasedMap | undefined>
   ) {
     // 自身が管理するExtraObjectWrapperをすべてさらう
@@ -201,7 +195,7 @@ export class SceneController extends MixinMouseInput(Object) {
       const wrapper = this._objects[tag];
       if (wrapper && wrapper._anchor) {
         // SiteWiseのクラウド側の最新値を参照する
-        const values: Record<string, unknown> = dataBindingValuesProvider(
+        const values: Record<string, Primitive> = dataBindingValuesProvider(
           dataInput,
           wrapper._anchor.valueDataBinding,
           dataBindingTemplate
@@ -215,7 +209,7 @@ export class SceneController extends MixinMouseInput(Object) {
         );
         // 色変更ルールにもとづいた、現在の状態を適用する
         if (ruleTarget) {
-          wrapper.stateChange(ruleTarget);
+          wrapper.stateChange(ruleTarget.target);
         }
       }
     }
