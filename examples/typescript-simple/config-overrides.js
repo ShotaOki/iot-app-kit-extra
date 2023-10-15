@@ -13,5 +13,15 @@ module.exports = function override(config, env) {
     "react/jsx-runtime.js": "react/jsx-runtime",
     "react/jsx-dev-runtime.js": "react/jsx-dev-runtime",
   };
+  // Consolidate chunk files instead
+  config.optimization.splitChunks = {
+    cacheGroups: {
+      default: false,
+    },
+  };
+  // Move runtime into bundle instead of separate file
+  config.mode = "development";
+  config.optimization.runtimeChunk = false;
+  config.optimization.minimize = false;
   return config;
 };
