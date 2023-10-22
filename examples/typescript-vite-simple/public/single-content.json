@@ -1,0 +1,142 @@
+{
+  "specVersion": "1.0",
+  "version": "1",
+  "unit": "meters",
+  "properties": { "environmentPreset": "neutral" },
+  "nodes": [
+    {
+      "name": "Camera1",
+      "transform": {
+        "position": [
+          0.41283826301894766, 1.620002632485634, 3.0935689365388823
+        ],
+        "rotation": [
+          -0.279003583680107, 0.1736712319410043, 0.04946250599490822
+        ],
+        "scale": [1, 1, 1]
+      },
+      "transformConstraint": {},
+      "components": [{ "type": "Camera", "cameraIndex": 0 }],
+      "properties": {}
+    },
+    {
+      "name": "壁のボタン",
+      "transform": {
+        "position": [
+          -1.678399158876828, 1.2094482197637244, 0.15491952091005556
+        ],
+        "rotation": [
+          5.551115123125783e-17, -1.925929944387236e-34, -6.938893903907228e-18
+        ],
+        "scale": [1, 1, 1]
+      },
+      "transformConstraint": {},
+      "components": [{ "type": "Tag", "valueDataBinding": {} }],
+      "properties": {}
+    },
+    {
+      "name": "初音ミク",
+      "transform": {
+        "position": [
+          0.3110343152336035, 0.0758471314483792, 0.38464630323655365
+        ],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "transformConstraint": {},
+      "components": [{ "type": "Tag", "valueDataBinding": {} }],
+      "properties": {}
+    },
+    {
+      "name": "壁の時計",
+      "transform": {
+        "position": [
+          -0.8978972242826915, 2.458931351269206, -2.169388714430837
+        ],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "transformConstraint": {},
+      "components": [{ "type": "Tag", "valueDataBinding": {} }],
+      "properties": {}
+    },
+    {
+      "name": "部屋",
+      "transform": {
+        "position": [
+          -0.1978972242826915, 0.058931351269206, -0.269388714430837
+        ],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "transformConstraint": {},
+      "components": [{ "type": "Tag", "valueDataBinding": {} }],
+      "properties": {}
+    }
+  ],
+  "rootNodeIndexes": [2, 0, 3, 1, 4],
+  "cameras": [
+    {
+      "fov": 53.13,
+      "near": 0.1,
+      "far": 1000,
+      "zoom": 1,
+      "cameraType": "Perspective"
+    }
+  ],
+  "rules": {
+    "sampleAlarmIconRule": {
+      "statements": [
+        {
+          "expression": "alarm_status == 'ACTIVE'",
+          "target": "iottwinmaker.common.icon:Error"
+        },
+        {
+          "expression": "alarm_status == 'ACKNOWLEDGED'",
+          "target": "iottwinmaker.common.icon:Warning"
+        },
+        {
+          "expression": "alarm_status == 'SNOOZE_DISABLED'",
+          "target": "iottwinmaker.common.icon:Warning"
+        },
+        {
+          "expression": "alarm_status == 'NORMAL'",
+          "target": "iottwinmaker.common.icon:Info"
+        }
+      ]
+    },
+    "sampleTimeSeriesIconRule": {
+      "statements": [
+        {
+          "expression": "temperature >= 40",
+          "target": "iottwinmaker.common.icon:Error"
+        },
+        {
+          "expression": "temperature >= 20",
+          "target": "iottwinmaker.common.icon:Warning"
+        },
+        {
+          "expression": "temperature < 20",
+          "target": "iottwinmaker.common.icon:Info"
+        }
+      ]
+    },
+    "sampleTimeSeriesColorRule": {
+      "statements": [
+        {
+          "expression": "temperature >= 40",
+          "target": "iottwinmaker.common.color:#FF0000"
+        },
+        {
+          "expression": "temperature >= 20",
+          "target": "iottwinmaker.common.color:#FFFF00"
+        },
+        {
+          "expression": "temperature < 20",
+          "target": "iottwinmaker.common.color:#00FF00"
+        }
+      ]
+    }
+  },
+  "defaultCameraIndex": 0
+}
