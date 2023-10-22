@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { basename } from "path";
 
 export default defineConfig((mode) => {
   const config = {
@@ -36,9 +37,9 @@ export default defineConfig((mode) => {
                   // text形式で外部ファイルのパスとしてロードする
                   loader: "text",
                   // localhostのpublicディレクトリにあるhdrを参照する
-                  contents: `http://localhost:${config.server.port}/${
-                    args.split("/")[-1]
-                  }`,
+                  contents: `http://localhost:${config.server.port}/${basename(
+                    args.path
+                  )}`,
                 };
               });
             },
