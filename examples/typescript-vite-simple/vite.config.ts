@@ -1,9 +1,9 @@
-import { defineConfig } from "vite";
+import { UserConfigExport, defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { basename } from "path";
+import path, { basename } from "path";
 
 export default defineConfig((mode) => {
-  const config = {
+  const config: UserConfigExport = {
     build: {
       outDir: "build",
     },
@@ -14,9 +14,24 @@ export default defineConfig((mode) => {
       host: true,
     },
     resolve: {
-      alias: {
-        path: "rollup-plugin-node-polyfills/polyfills/path",
-      },
+      alias: [
+        {
+          find: "path",
+          replacement: "rollup-plugin-node-polyfills/polyfills/path",
+        },
+        {
+          find: /^@iot-app-kit/,
+          replacement: path.join(__dirname, "node_modules/@iot-app-kit"),
+        },
+        {
+          find: /^three\//,
+          replacement: path.join(__dirname, "node_modules/three/"),
+        },
+        {
+          find: /^three$/,
+          replacement: path.join(__dirname, "node_modules/three"),
+        },
+      ],
     },
     preview: {
       port: 4000,
@@ -29,7 +44,7 @@ export default defineConfig((mode) => {
       esbuildOptions: {
         plugins: [
           {
-            name: "hdr-development-loader-plugins",
+            name: "hdr-dev-loader-plugins",
             setup(build) {
               build.onLoad({ filter: /\.hdr$/ }, async (args) => {
                 return {

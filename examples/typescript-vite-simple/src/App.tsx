@@ -1,42 +1,75 @@
 import "./App.css";
-import { SceneLoader } from "@iot-app-kit/source-iottwinmaker/dist/es/types";
 import { SceneViewer } from "@iot-app-kit/scene-composer";
-
-/**
- * シーンローダーの拡張クラス
- *
- * publicにあるTwinMakerのファイルを直接参照する
- */
-export class DirectSceneLoader implements SceneLoader {
-  public getSceneUri: () => Promise<string | null>;
-  public getSceneObject: (uri: string) => Promise<ArrayBuffer> | null;
-  /**
-   * コンストラクタ
-   * @param fileUrl public以下に配置したTwinMakerの構造を指したjsonファイルのパス
-   */
-  constructor(fileUrl: string) {
-    /**
-     * シーンURLを取得する（ダミー）
-     */
-    this.getSceneUri = async () => {
-      return "empty";
-    };
-    /**
-     * シーンオブジェクトを取得する
-     */
-    this.getSceneObject = async (uri: string) => {
-      const res = await fetch(fileUrl);
-      return res.arrayBuffer();
-    };
-  }
-}
+import {
+  useOverrideTags,
+  DirectSceneLoader,
+  ButtonStyle,
+  proxyFetch,
+} from "@iak-extra/scene-composer-extra";
 
 function App() {
   const sceneLoader = new DirectSceneLoader("/single-content.json");
+
+  /** TwinMakerのタグを上書きする */
+  const controller = useOverrideTags({
+    // TwinMakerのタグをボタンに置き換える
+    壁のボタン: (replaceTag) =>
+      replaceTag.toButton
+        ?.create({
+          angle: 90,
+          content: "Close",
+          width: 0.7,
+          height: 0.24,
+          stateStyle: ButtonStyle.Standard,
+        })
+        .onClickEvent(() => {
+          console.log("clicked: 閉じる");
+          // proxyFetchはfetch互換のAPIです。npm run start時だけ動作します
+          // proxyFetchは、どのドメインからもCORSの制限を受けません
+          proxyFetch("https://www.w3.org/").then((r) => {
+            r.text().then((t) => {
+              console.log(t);
+            });
+          });
+        }),
+    // TwinMakerのタグをボタンに置き換える
+    初音ミク: (replaceTag) =>
+      replaceTag.toMMD
+        ?.create({
+          angle: 0,
+          scale: 0.08,
+          pmxPath: "/example/miku_v2.pmd",
+          useMotionList: {
+            dance: "/example/wavefile_v2.vmd",
+          },
+        })
+        .onStateChangeEvent((mesh, model, state) => {
+          return ["dance"];
+        }),
+    // TwinMakerのタグをボタンに置き換える
+    壁の時計: (replaceTag) =>
+      replaceTag.toText
+        ?.create({
+          angle: 0,
+          content: "Time",
+        })
+        .onAnimating((text) => {
+          text.set({
+            content: new Date().toISOString().split(".")[0],
+          });
+        }),
+    部屋: (replaceTag) =>
+      replaceTag.toGLTF?.create({
+        angle: 0,
+        modelPath: "/example/studio_apartment_vray_baked_textures_included.glb",
+      }),
+  });
   return (
-    <>
-      <SceneViewer sceneLoader={sceneLoader} activeCamera="Camera1" />
-    </>
+    <SceneViewer
+      sceneComposerId={controller.composerId}
+      sceneLoader={sceneLoader}
+      activeCamera="Camera1"
+    />
   );
 }
 
