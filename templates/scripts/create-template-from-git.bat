@@ -1,9 +1,12 @@
 @ECHO OFF
 
+SET PRODUCT_NAME=%1
+SET EXPORT_NAME=%2
+
 REM SET URL
-SET REPOSITORY="https://github.com/ShotaOki/iot-app-kit-extra/trunk/examples/typescript-simple"
+SET REPOSITORY="https://github.com/ShotaOki/iot-app-kit-extra/trunk/examples/%PRODUCT_NAME%"
 REM SET TARGET DIRECTORY
-SET TARGET="typescript-simple"
+SET TARGET="%EXPORT_NAME%"
 
 REM SET 7z Directory
 SET CREATE_ZIP="C:\Program Files\7-Zip\7z.exe"
