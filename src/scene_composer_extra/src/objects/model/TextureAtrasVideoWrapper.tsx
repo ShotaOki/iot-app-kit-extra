@@ -12,6 +12,7 @@ import {
   Clock,
 } from "three/src/Three";
 import { AnimationParameter } from "../../types/DataType";
+import { NoLightingShader } from "../../shader/NoLightingShader";
 
 interface AtrasData {
   x: number;
@@ -94,6 +95,13 @@ export class TextureAtrasVideoWrapper extends ExtraObjectWrapper {
       )
     );
     const material = new MeshBasicMaterial({ color: 0xffffff });
+    // TwinMakerが明るすぎて白飛びするため、光源の影響を受けないシェーダを使う
+    // ※MotionIndicatorComponent用のシェーダを転用したもの
+    material.onBeforeCompile = (shader) => {
+      shader.fragmentShader = NoLightingShader;
+    };
+    material.needsUpdate = true;
+    // シェーダをメッシュに適用する
     this._imageBlock = new Mesh(geometry, material);
 
     // 画像の表示位置を補正する
