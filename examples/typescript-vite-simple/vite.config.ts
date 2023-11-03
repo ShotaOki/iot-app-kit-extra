@@ -3,10 +3,14 @@ import react from "@vitejs/plugin-react";
 import path, { basename } from "path";
 
 export default defineConfig((mode) => {
+  // デプロイする対象のパスを設定する
+  const VITE_PROJECT_DEPLOYMENT_ROOT = "/";
+  // Viteのビルド設定
   const config: UserConfigExport = {
     build: {
       outDir: "build",
     },
+    base: VITE_PROJECT_DEPLOYMENT_ROOT,
     assetsInclude: ["**/*.hdr"],
     plugins: [react()],
     server: {
