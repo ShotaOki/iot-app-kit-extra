@@ -43,6 +43,7 @@ function App() {
             dance: "/example/wavefile_v2.vmd",
           },
         })
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         .onStateChangeEvent((mesh, model, state) => {
           return ["dance"];
         }),

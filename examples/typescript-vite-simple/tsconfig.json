@@ -9,6 +9,7 @@
     ],
     "types": ["node", "vite/client"],
     "allowJs": true,
+    "allowImportingTsExtensions": true,
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
