@@ -1,6 +1,6 @@
 {
   "name": "@iak-extra/scene-composer-extra",
-  "version": "0.2.9",
+  "version": "0.3.0",
   "description": "Extra Libraries for IoT App Kit Scene Composer",
   "publishConfig": {
     "access": "public"
@@ -19,6 +19,8 @@
   "types": "./dist/es/index.d.ts",
   "scripts": {
     "build": "",
+    "copy:config": "copy package.json ..\\..\\package\\scene_composer_extra\\package.json",
+    "copy:wslconfig": "cp package.json ../../package/scene_composer_extra/package.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "files": [
@@ -33,16 +35,16 @@
   },
   "homepage": "https://shotaoki.github.io/iot-app-kit-extra/",
   "dependencies": {
-    "@iot-app-kit/scene-composer": "^3.4.0",
-    "@iot-app-kit/source-iottwinmaker": "^6.2.0",
-    "@react-three/drei": "^9.44.1",
-    "@react-three/fiber": "^8.13.3",
+    "@iot-app-kit/scene-composer": "^9.4.0",
+    "@iot-app-kit/source-iottwinmaker": "^9.4.0",
+    "@react-three/drei": "^9.74.12",
+    "@react-three/fiber": "^8.14.5",
     "jsx-runtime": "^1.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "recharts": "^2.8.0",
-    "three": "^0.139.0",
-    "three-mesh-bvh": "^0.5.15",
+    "three": "^0.146.0",
+    "three-mesh-bvh": "^0.5.23",
     "three-mesh-ui": "^6.5.4",
     "three-stdlib": "^2.18.1",
     "typescript": "^5.1.6"
@@ -52,6 +54,7 @@
     "@types/node": "^16.18.35",
     "@types/react": "^18.2.11",
     "@types/react-dom": "^18.2.4",
-    "@types/three": "^0.139.0"
+    "@types/three": "^0.146.0",
+    "rollup-plugin-node-polyfills": "^0.2.1"
   }
 }
