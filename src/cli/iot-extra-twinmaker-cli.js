@@ -20,7 +20,7 @@ yargs(hideBin(process.argv))
       args.options("template", {
         alias: "t",
         choices: CREATE_REACT_APP_RESOURCE_LIST,
-        default: "typescript-simple",
+        default: "typescript-vite-simple",
       });
     },
     (args) => {

@@ -12,7 +12,9 @@ export interface CreateReactAppParameter {
 
 /** テンプレートの一覧 */
 export const TEMPLATE_NAME_LIST = [
-  "typescript-simple", // ReactAppのテンプレート: AWS権限なし、TwinMakerだけを構築する
+  "typescript-vite-simple", // Viteのテンプレート: AWS権限なし、TwinMakerだけを構築する
+  "typescript-cra-simple", // ReactCreateAppのテンプレート: AWS権限なし、TwinMakerだけを構築する
+  "typescript-cra-simple-legacy", // レガシーなReactCreateAppのテンプレート: AWS権限なし、TwinMakerだけを構築する
 ];
 
 /** 機能: アプリを作成する */
@@ -59,7 +61,8 @@ export class CreateReactApp {
       )
     );
     // テンプレートからURLを取得する
-    const url = downloadTemplate[props.template]["url"];
+    const template = downloadTemplate[props.template];
+    const url = template["url"];
     // URLのファイルをダウンロードする
     DownloadUtility.downloadResponse(url).then((item: any) => {
       // ZIPファイルのデータ
@@ -103,15 +106,17 @@ export class CreateReactApp {
       // ZIPを展開する
       unzipper.push(receivedItem);
     });
+
+    return template["option"];
   }
 
   /**
    * Npm install を実行する
    * @param props アプリの情報
    */
-  static install(props: CreateReactAppParameter) {
+  static install(props: CreateReactAppParameter, installOption: string) {
     const workingdirectory = resolve(process.cwd(), props.appName);
-    spawn("npm", ["install", "--legacy-peer-deps"], {
+    spawn("npm", ["install", installOption], {
       cwd: workingdirectory,
       shell: true,
       stdio: "inherit",

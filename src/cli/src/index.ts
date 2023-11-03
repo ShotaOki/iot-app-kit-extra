@@ -24,20 +24,18 @@ export function createReactApp(props: CreateReactAppParameter) {
   console.log(">> 1. Download template");
 
   // アプリを作成する
-  CreateReactApp.create(props);
+  const installOption = CreateReactApp.create(props);
 
   // 標準テンプレートだった場合
-  if (props.template == "typescript-simple") {
-    console.log(">> 2. Download example resources");
+  console.log(">> 2. Download example resources");
 
-    // アプリの必要なリソースをダウンロードする
-    DownloadResource.download({ name: "example-twinmaker" }, props.appName);
-  }
+  // アプリの必要なリソースをダウンロードする
+  DownloadResource.download({ name: "example-twinmaker" }, props.appName);
 
   console.log(">> 3. Execute NPM install command");
 
   // Npm Installを実行する
-  CreateReactApp.install(props);
+  CreateReactApp.install(props, installOption);
 
   console.log("");
   console.log(`Completed! Created ${props.appName}`);
