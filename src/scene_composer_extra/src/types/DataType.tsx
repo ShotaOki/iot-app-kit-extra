@@ -1,5 +1,5 @@
 import { ExtraObjectWrapper } from "../objects/ExtraObjectWrapper";
-import { Vector2, Raycaster } from "three/src/Three";
+import { Vector2, Raycaster, Quaternion } from "three/src/Three";
 import { ReplaceTag } from "../controllers/TagController";
 
 export type SearchTagsCallback = (
@@ -18,4 +18,5 @@ export interface AnimationParameter {
   isSelect: boolean;
   raycaster: Raycaster;
   cameraState: string;
+  cameraAngle: Quaternion;
 }

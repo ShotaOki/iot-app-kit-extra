@@ -85,6 +85,7 @@ export class SceneController extends MixinMouseInput(Object) {
 
         // カメラの状態を文字列化する
         let cameraState = "-";
+        const cameraAngle = camera.quaternion;
         try {
           cameraState = camera.matrix.elements
             .map((e) => e.toFixed(3))
@@ -100,6 +101,7 @@ export class SceneController extends MixinMouseInput(Object) {
           that._objects[k].callAnimationLoop({
             ...that.currentEvent,
             cameraState: cameraState,
+            cameraAngle: cameraAngle,
           });
         });
         that.next();
