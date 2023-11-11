@@ -155,8 +155,9 @@ export class GroupWrapper extends MixinAnimation(ExtraObjectWrapper) {
     return this;
   }
 
-  /** アニメーションループ */
-  executeAnimationLoop(parameter: AnimationParameter) {
+  /** 子オブジェクトに伝播する：アニメーションループ */
+  callAnimationLoop(parameter: AnimationParameter) {
+    super.callAnimationLoop(parameter);
     // アニメーションの状態を更新
     for (let key of Object.keys(this._children)) {
       // イベントは子オブジェクトに連携する
@@ -170,6 +171,16 @@ export class GroupWrapper extends MixinAnimation(ExtraObjectWrapper) {
       if (this._onMoveCameraEvent) {
         this._onMoveCameraEvent();
       }
+    }
+  }
+
+  /** 子オブジェクトに伝播する：アニメーションループ */
+  stateChange(newState: string | number): void {
+    super.stateChange(newState);
+    // アニメーションの状態を更新
+    for (let key of Object.keys(this._children)) {
+      // イベントは子オブジェクトに連携する
+      this._children[key].stateChange(newState);
     }
   }
 }

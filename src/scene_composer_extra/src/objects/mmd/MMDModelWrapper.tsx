@@ -8,6 +8,7 @@ import {
   SkinnedMesh,
   AnimationClip,
   Clock,
+  Object3D,
 } from "three/src/Three";
 import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader";
 import { MMDAnimationHelper } from "three/examples/jsm/animation/MMDAnimationHelper";
@@ -55,6 +56,8 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
     this._animationHelper = animationHelper;
     // 自身のインスタンスの参照を保持
     const that = this;
+    // 読み込みが完了するまで、ダミーのオブジェクトを保持する
+    that._object = new Object3D();
     /** 非同期でMMDモデルを取得する */
     loader.loadAsync(parameter.pmxPath).then((mesh) => {
       // 位置情報、大きさ、回転角度をTwinMakerのタグに合わせる
@@ -62,6 +65,7 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
       // 影を表示する
       mesh.castShadow = true;
       mesh.receiveShadow = true;
+      mesh.visible = that._object?.visible ?? true;
 
       // TwinMakerに合わせてシェーダを補正する
       for (let m of mesh.material as Material[]) {

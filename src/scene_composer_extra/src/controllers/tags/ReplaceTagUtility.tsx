@@ -1,4 +1,7 @@
-import { ModelParameterBase } from "../../objects/ExtraObjectWrapper";
+import {
+  ExtraObjectWrapper,
+  ModelParameterBase,
+} from "../../objects/ExtraObjectWrapper";
 import { GroupWrapper } from "../../objects/group/GroupWrapper";
 import { MeshUiButtonParameter } from "../../objects/three-mesh-ui/MeshUiButtonWrapper";
 import { SearchTagsCallback } from "../../types/DataType";
@@ -7,6 +10,7 @@ import { ReplaceTagPluginConstructor } from "./ReplaceTagBase";
 // タグ名を定義する
 const TAG_NAME_CONTENTS = "Contents";
 const TAG_NAME_BUTTON = "Button";
+const TAG_NAME_LOADING_VIEW = "Loading";
 // アニメーションの実行時間を定義する
 const DEFAULT_ANIMATION_DURATION = 0.4;
 
@@ -63,6 +67,35 @@ export function ReplaceTagUtility<TBase extends ReplaceTagPluginConstructor>(
           });
         // 初期設定: ボタンを表示中にする
         group.showSingleChild(TAG_NAME_BUTTON);
+        return group;
+      }
+      return undefined;
+    }
+
+    withLoadingGroup(parameter: {
+      group?: ModelParameterBase;
+      asyncRequest: (content: ExtraObjectWrapper | undefined) => Promise<void>;
+      contents: SearchTagsCallback;
+    }) {
+      const tag = this._tag;
+      if (tag) {
+        tag.visible = false;
+        // グループを作成する
+        const group = new GroupWrapper(this.parameter(tag)).create({
+          ...(parameter.group ?? {}),
+          children: {
+            [TAG_NAME_LOADING_VIEW]: (replace) =>
+              replace.toLoadingView?.create({}),
+            [TAG_NAME_CONTENTS]: parameter.contents,
+          },
+        });
+        // 初期設定: ローディングを表示中にする
+        group.showSingleChild(TAG_NAME_LOADING_VIEW);
+        // 非同期読み込みを実施
+        parameter.asyncRequest(group.getChild(TAG_NAME_CONTENTS)).then(() => {
+          // 処理が完了したのなら表示を切り替える
+          group.showSingleChild(TAG_NAME_CONTENTS);
+        });
         return group;
       }
       return undefined;
