@@ -167,6 +167,7 @@ export class SceneController extends MixinMouseInput(Object) {
             overrides[tag]
           );
           if (wrapper) {
+            wrapper.awake(); // 初期化の完了を通知する
             this._objects[tag] = wrapper;
           }
         }

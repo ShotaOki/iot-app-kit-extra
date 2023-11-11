@@ -69,6 +69,7 @@ export class GroupWrapper extends MixinAnimation(ExtraObjectWrapper) {
         )
       );
       if (result) {
+        result.awake(); // 初期化の完了を通知する
         this._children[tag] = result;
         this._visibleChildName.push(tag);
       }

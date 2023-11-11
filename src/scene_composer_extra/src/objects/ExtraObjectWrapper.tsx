@@ -49,6 +49,10 @@ export interface ExtraObjectInterface {
   callAnimationLoop(parameter: AnimationParameter): void;
   /** 状態の変更 */
   stateChange(newState: string | number): void;
+  /** create完了通知関数 */
+  awake(): void;
+  /** 読み込み完了通知の追加 */
+  onLoad(onLoadedFunction: () => void): ExtraObjectWrapper;
 }
 
 /** ライブラリ内部で利用できるExtraObjectの情報 */
@@ -71,6 +75,8 @@ export class ExtraObjectWrapper implements ExtraObjectInterface {
   protected _object: Object3D | undefined;
   // オプション: 親オブジェクト（未設定であればルートシーンを親とする）
   protected _parentObject: Object3D | undefined;
+  // オプション: 読み込み完了通知関数
+  protected _onLoadFunction: (() => void) | undefined;
 
   constructor(parameter: ExtraObjectWrapperParameter) {
     this._rootScene = parameter.rootScene;
@@ -202,5 +208,21 @@ export class ExtraObjectWrapper implements ExtraObjectInterface {
     // 状態を更新する
     this._state = newState;
     this.receivedChangeState(newState);
+  }
+
+  /** 読み込み完了通知の追加 */
+  onLoad(onLoadedFunction: () => void) {
+    this._onLoadFunction = onLoadedFunction;
+    return this;
+  }
+
+  /** create完了通知関数 */
+  awake() {
+    // onLoadを実行する
+    // 実行する必要がないのなら、子クラスでoverrideする
+    if (this._onLoadFunction) {
+      // 完了通知関数を実行する
+      this._onLoadFunction();
+    }
   }
 }

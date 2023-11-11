@@ -7,6 +7,7 @@ import { MeshUiButtonParameter } from "../../objects/three-mesh-ui/MeshUiButtonW
 import { SearchTagsCallback } from "../../types/DataType";
 import { ReplaceTagPluginConstructor } from "./ReplaceTagBase";
 import { MeshUiLoadingParameter } from "../../objects/three-mesh-ui/MeshUiLoadingWrapper";
+import { ReplaceTag } from "../TagController";
 
 // タグ名を定義する
 const TAG_NAME_CONTENTS = "Contents";
@@ -73,7 +74,10 @@ export function ReplaceTagUtility<TBase extends ReplaceTagPluginConstructor>(
       return undefined;
     }
 
-    withLoadingGroup(parameter: {
+    /**
+     * 非同期処理完了後にコンテンツを表示する
+     */
+    withAsyncRequest(parameter: {
       group?: ModelParameterBase;
       loader?: MeshUiLoadingParameter;
       asyncRequest: (content: ExtraObjectWrapper | undefined) => Promise<void>;
@@ -98,6 +102,41 @@ export function ReplaceTagUtility<TBase extends ReplaceTagPluginConstructor>(
           // 処理が完了したのなら表示を切り替える
           group.showSingleChild(TAG_NAME_CONTENTS);
         });
+        return group;
+      }
+      return undefined;
+    }
+
+    /**
+     * 非同期で読み込むリソースがあるときに、読み込み完了後に表示する
+     */
+    withAsyncLoadContents(parameter: {
+      group?: ModelParameterBase;
+      loader?: MeshUiLoadingParameter;
+      contents: SearchTagsCallback;
+    }) {
+      const tag = this._tag;
+      if (tag) {
+        tag.visible = false;
+        let calledOnLoad = false;
+        // グループを作成する
+        const group = new GroupWrapper(this.parameter(tag)).create({
+          ...(parameter.group ?? {}),
+          children: {
+            [TAG_NAME_LOADING_VIEW]: (replace) =>
+              replace.toLoadingView?.create(parameter.loader ?? {}),
+            [TAG_NAME_CONTENTS]: (replaceTag: ReplaceTag) =>
+              parameter.contents(replaceTag)?.onLoad(() => {
+                calledOnLoad = true;
+                // 処理が完了したのなら表示を切り替える
+                group.showSingleChild(TAG_NAME_CONTENTS);
+              }),
+          },
+        });
+        if (!calledOnLoad) {
+          // 初期設定: ローディングを表示中にする
+          group.showSingleChild(TAG_NAME_LOADING_VIEW);
+        }
         return group;
       }
       return undefined;
