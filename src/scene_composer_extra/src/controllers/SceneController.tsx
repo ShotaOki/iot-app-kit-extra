@@ -2,7 +2,7 @@ import { Object3D, Event, Scene } from "three/src/Three";
 import { ISceneNodeInternal } from "@iot-app-kit/scene-composer/dist/src/store";
 import { findRootScene, getState } from "../utility/SceneUtility";
 import { ISceneFieldInterface } from "../types/ISceneField";
-import { ExtraObjectWrapper } from "../objects/ExtraObjectWrapper";
+import { ExtraObjectInterface } from "../objects/ExtraObjectWrapper";
 import {
   IDataBindingTemplate,
   IDataInput,
@@ -31,7 +31,7 @@ export class SceneController extends MixinMouseInput(Object) {
   // シーンの更新通知関数
   private _interface: ISceneFieldInterface;
   // Tagを置き換えたあとのオブジェクト管理インスタンス
-  private _objects: { [key: string]: ExtraObjectWrapper };
+  private _objects: { [key: string]: ExtraObjectInterface };
 
   constructor(
     composeId: string,
@@ -85,6 +85,7 @@ export class SceneController extends MixinMouseInput(Object) {
 
         // カメラの状態を文字列化する
         let cameraState = "-";
+        const cameraAngle = camera.quaternion;
         try {
           cameraState = camera.matrix.elements
             .map((e) => e.toFixed(3))
@@ -100,6 +101,7 @@ export class SceneController extends MixinMouseInput(Object) {
           that._objects[k].callAnimationLoop({
             ...that.currentEvent,
             cameraState: cameraState,
+            cameraAngle: cameraAngle,
           });
         });
         that.next();
@@ -165,6 +167,7 @@ export class SceneController extends MixinMouseInput(Object) {
             overrides[tag]
           );
           if (wrapper) {
+            wrapper.awake(); // 初期化の完了を通知する
             this._objects[tag] = wrapper;
           }
         }
@@ -193,15 +196,15 @@ export class SceneController extends MixinMouseInput(Object) {
     // 自身が管理するExtraObjectWrapperをすべてさらう
     for (let tag of Object.keys(this._objects)) {
       const wrapper = this._objects[tag];
-      if (wrapper && wrapper._anchor) {
+      if (wrapper && wrapper.anchor) {
         // SiteWiseのクラウド側の最新値を参照する
         const values: Record<string, Primitive> = dataBindingValuesProvider(
           dataInput,
-          wrapper._anchor.valueDataBinding,
+          wrapper.anchor.valueDataBinding,
           dataBindingTemplate
         );
         // TwinMakerの色変更ルールを参照する
-        const ruleId = wrapper._anchor.ruleBasedMapId;
+        const ruleId = wrapper.anchor.ruleBasedMapId;
         const ruleTarget = ruleEvaluator(
           SystemLoadingStatus.UndefinedState,
           values,

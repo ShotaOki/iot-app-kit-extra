@@ -5,6 +5,7 @@ import { GLTFModelWrapper } from "../../objects/model/GLTFModelWrapper";
 import { ImageModelWrapper } from "../../objects/model/ImageModelWrapper";
 import { TextureAtrasVideoWrapper } from "../../objects/model/TextureAtrasVideoWrapper";
 import { MeshUiButtonWrapper } from "../../objects/three-mesh-ui/MeshUiButtonWrapper";
+import { MeshUiLoadingWrapper } from "../../objects/three-mesh-ui/MeshUiLoadingWrapper";
 import { MeshUiTextWrapper } from "../../objects/three-mesh-ui/MeshUiTextWrapper";
 import { ReplaceTagPluginConstructor } from "./ReplaceTagBase";
 
@@ -81,6 +82,18 @@ export function ReplaceTagBasic<TBase extends ReplaceTagPluginConstructor>(
       if (tag) {
         tag.visible = false;
         return new MeshUiTextWrapper(this.parameter(tag));
+      }
+      return undefined;
+    }
+
+    /**
+     * TwinMakerのタグオブジェクトを読み込み中画面に置き換える
+     */
+    get toLoadingView() {
+      const tag = this._tag;
+      if (tag) {
+        tag.visible = false;
+        return new MeshUiLoadingWrapper(this.parameter(tag));
       }
       return undefined;
     }
