@@ -161,7 +161,7 @@ export class GroupWrapper extends MixinAnimation(ExtraObjectWrapper) {
     // アニメーションの状態を更新
     for (let key of Object.keys(this._children)) {
       // イベントは子オブジェクトに連携する
-      this._children[key].executeAnimationLoop(parameter);
+      this._children[key].callAnimationLoop(parameter);
     }
     // アニメーションを実行する
     this.executeAnimation(this._animationController);

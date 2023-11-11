@@ -6,6 +6,7 @@ import { GroupWrapper } from "../../objects/group/GroupWrapper";
 import { MeshUiButtonParameter } from "../../objects/three-mesh-ui/MeshUiButtonWrapper";
 import { SearchTagsCallback } from "../../types/DataType";
 import { ReplaceTagPluginConstructor } from "./ReplaceTagBase";
+import { MeshUiLoadingParameter } from "../../objects/three-mesh-ui/MeshUiLoadingWrapper";
 
 // タグ名を定義する
 const TAG_NAME_CONTENTS = "Contents";
@@ -74,6 +75,7 @@ export function ReplaceTagUtility<TBase extends ReplaceTagPluginConstructor>(
 
     withLoadingGroup(parameter: {
       group?: ModelParameterBase;
+      loader?: MeshUiLoadingParameter;
       asyncRequest: (content: ExtraObjectWrapper | undefined) => Promise<void>;
       contents: SearchTagsCallback;
     }) {
@@ -85,7 +87,7 @@ export function ReplaceTagUtility<TBase extends ReplaceTagPluginConstructor>(
           ...(parameter.group ?? {}),
           children: {
             [TAG_NAME_LOADING_VIEW]: (replace) =>
-              replace.toLoadingView?.create({}),
+              replace.toLoadingView?.create(parameter.loader ?? {}),
             [TAG_NAME_CONTENTS]: parameter.contents,
           },
         });
