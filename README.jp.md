@@ -140,15 +140,39 @@ npm install
 
 ```bash
 # src/scene_composer_extraで実施する
-npm run build
+npm run build:local
 
-# 結果はpackage/scene_composer_extra/distに出力される
+# 結果はsrc/scene_composer_extra/distに出力される
 ```
 
 以下のコマンドで、開発用プロジェクトにライブラリを取り込みます。
 
 ```bash
-npm install ${ルートディレクトリ}/package/scene_composer_extra
+npm install ${ルートディレクトリ}/src/scene_composer_extra
+```
+
+## テスト
+
+以下のリポジトリで、Github アクションを実行します
+
+https://github.com/ShotaOki/iot-app-kit-extra-document
+
+最新のソースコードと依存関係でビルドをして、ライブデモを更新します。  
+ビルドに成功すること、表示や挙動が正しいことを目視で確認します。
+
+ライブデモの出力先:
+
+https://shotaoki.github.io/iot-app-kit-extra/
+
+## パブリッシュ
+
+以下のコマンドで、ライブラリをビルドします。
+
+```bash
+# src/scene_composer_extraで実施する
+npm run build
+
+# 結果はpackage/scene_composer_extra/distに出力される
 ```
 
 以下のコマンドで、NPM にプッシュします。

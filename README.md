@@ -138,15 +138,38 @@ Build the library with the following command.
 
 ```bash
 # Execute Directory :: src/scene_composer_extra
-npm run build
+npm run build:local
 
-# Export To :: package/scene_composer_extra/dist
+# Export To :: src/scene_composer_extra/dist
 ```
 
 The following command will import the library into your development project.
 
 ```bash
-npm install ${ProjectRoot}/package/scene_composer_extra
+npm install ${ProjectRoot}/src/scene_composer_extra
+```
+
+## Test
+
+Execute github action on this repository.
+
+https://github.com/ShotaOki/iot-app-kit-extra-document
+
+Github action will update all live demos with latest source code.
+
+Destination:
+
+https://shotaoki.github.io/iot-app-kit-extra/
+
+## Publish
+
+Build the library with the following command.
+
+```bash
+# Execute Directory :: src/scene_composer_extra
+npm run build
+
+# Export To :: package/scene_composer_extra/dist
 ```
 
 The following command pushes to NPM.
