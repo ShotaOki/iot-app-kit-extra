@@ -4,6 +4,9 @@ import {
 } from "../ExtraObjectWrapper";
 import { Texture, TextureLoader } from "three/src/Three";
 import ThreeMeshUI from "three-mesh-ui";
+import { MixinLoadObserver } from "../../mixin/MixinLoadObserver";
+
+const IMAGE_LOADED_KEY = "imageLoaded";
 
 export interface ImageModelParameter extends ModelParameterBase {
   // 画像のファイルパス
@@ -14,10 +17,17 @@ export interface ImageModelParameter extends ModelParameterBase {
   height: number;
 }
 
+// クラスに取り込むミックスインを指定する
+// prettier-ignore
+const MixinExtraObject = /** */
+MixinLoadObserver( // ローディングの完了を監視する
+  ExtraObjectWrapper
+);
+
 /**
  * 2D画像、または2D画像の配列を表示するクラス
  */
-export class ImageModelWrapper extends ExtraObjectWrapper {
+export class ImageModelWrapper extends MixinExtraObject {
   private _imageBlock: any;
 
   private _textureList: Texture[] = [];
@@ -31,6 +41,9 @@ export class ImageModelWrapper extends ExtraObjectWrapper {
    * @returns
    */
   create(parameter: ImageModelParameter) {
+    // 読み込みの完了を監視する
+    this._loadObserverInitiate({ requiredParameter: [IMAGE_LOADED_KEY] });
+
     // パネルを作成する
     const imageBlock: any = new ThreeMeshUI.Block({
       height: parameter.height,
@@ -132,6 +145,7 @@ export class ImageModelWrapper extends ExtraObjectWrapper {
       loader.loadAsync(imagePath).then((texture) => {
         that._textureList = [texture];
         that.setIndex(0);
+        that.sendMessageToLoadObserver(IMAGE_LOADED_KEY);
       });
     } else {
       // 配列で受けた画像を全て登録する
@@ -140,6 +154,7 @@ export class ImageModelWrapper extends ExtraObjectWrapper {
         (textureList) => {
           that._textureList = textureList;
           that.setIndex(0);
+          that.sendMessageToLoadObserver(IMAGE_LOADED_KEY);
         }
       );
     }

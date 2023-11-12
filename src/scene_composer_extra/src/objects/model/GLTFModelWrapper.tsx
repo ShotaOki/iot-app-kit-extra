@@ -5,6 +5,9 @@ import {
 import { AnimationMixer, Clock } from "three/src/Three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { AnimationParameter, SystemLoadingStatus } from "../../types/DataType";
+import { MixinLoadObserver } from "../../mixin/MixinLoadObserver";
+
+const GLTF_LOADED_KEY = "gltfLoaded";
 
 export interface GLTFModelParameter extends ModelParameterBase {
   // GLBモデルのファイルパス
@@ -13,7 +16,14 @@ export interface GLTFModelParameter extends ModelParameterBase {
   useMotionList?: { [key: string]: string };
 }
 
-export class GLTFModelWrapper extends ExtraObjectWrapper {
+// クラスに取り込むミックスインを指定する
+// prettier-ignore
+const MixinExtraObject = /** */
+MixinLoadObserver( // ローディングの完了を監視する
+  ExtraObjectWrapper
+);
+
+export class GLTFModelWrapper extends MixinExtraObject {
   // アニメーションを管理するミキサー
   private _mixier?: AnimationMixer;
   // タイマーループ
@@ -28,9 +38,11 @@ export class GLTFModelWrapper extends ExtraObjectWrapper {
   create(parameter: GLTFModelParameter) {
     // ローダーを作成する
     const loader = new GLTFLoader();
+    // 読み込みの完了を監視する
+    this._loadObserverInitiate({ requiredParameter: [GLTF_LOADED_KEY] });
     // 自身のインスタンスの参照を保持
     const that = this;
-    /** 非同期でMMDモデルを取得する */
+    /** 非同期でGLTFモデルを取得する */
     loader.loadAsync(parameter.modelPath).then((mesh) => {
       // 読み取ったモデルを参照する
       const animations = mesh.animations;
@@ -46,6 +58,9 @@ export class GLTFModelWrapper extends ExtraObjectWrapper {
 
       // 状態を初期化する
       that.stateChange(SystemLoadingStatus.Init);
+
+      // 読み込みの完了を通知する
+      this.sendMessageToLoadObserver(GLTF_LOADED_KEY);
 
       // モデルにアニメーションが登録されているのなら
       if (animations.length >= 1) {

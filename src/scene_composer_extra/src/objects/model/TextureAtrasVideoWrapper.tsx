@@ -13,6 +13,9 @@ import {
 } from "three/src/Three";
 import { AnimationParameter } from "../../types/DataType";
 import { NoLightingShader } from "../../shader/NoLightingShader";
+import { MixinLoadObserver } from "../../mixin/MixinLoadObserver";
+
+const ATRAS_LOADED_KEY = "atrasLoaded";
 
 interface AtrasData {
   x: number;
@@ -34,10 +37,17 @@ export interface TextureAtrasVideoParameter extends ModelParameterBase {
   fps?: number;
 }
 
+// クラスに取り込むミックスインを指定する
+// prettier-ignore
+const MixinExtraObject = /** */
+MixinLoadObserver( // ローディングの完了を監視する
+  ExtraObjectWrapper
+);
+
 /**
  * 2D画像、または2D画像の配列を表示するクラス
  */
-export class TextureAtrasVideoWrapper extends ExtraObjectWrapper {
+export class TextureAtrasVideoWrapper extends MixinExtraObject {
   private _imageBlock: any;
 
   private _texture?: Texture;
@@ -64,6 +74,9 @@ export class TextureAtrasVideoWrapper extends ExtraObjectWrapper {
     const UV_RIGHT_TOP = [1, 1]; // x + w : y + h
     const UV_LEFT_BOTTOM = [0, 0]; // x : y
     const UV_RIGHT_BOTTOM = [1, 0]; // x + w : y
+
+    // 読み込みの完了を監視する
+    this._loadObserverInitiate({ requiredParameter: [ATRAS_LOADED_KEY] });
 
     const geometry = new BufferGeometry();
     geometry.setAttribute(
@@ -184,6 +197,9 @@ export class TextureAtrasVideoWrapper extends ExtraObjectWrapper {
 
       this._imageBlock.material.map = texture;
       this._imageBlock.material.needsUpdate = true;
+
+      // 読み込みの完了を通知する
+      that.sendMessageToLoadObserver(ATRAS_LOADED_KEY);
     });
   }
 
