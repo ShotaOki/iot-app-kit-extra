@@ -11,6 +11,9 @@ import { AnimationParameter } from "../../types/DataType";
 import { Clock } from "three/src/Three";
 import { MixinBillboard } from "../../mixin/MixinBillboard";
 
+// 動的な更新が可能なコンテンツ
+export type DynamicDrawing = () => JSX.Element;
+
 // このラッパの初期化パラメータ:
 // 子クラスの引数として利用できないものを除いたパラメータを指定する
 export interface HTMLModelParameterBaseInterface extends ModelParameterBase {
@@ -24,7 +27,7 @@ export interface HTMLModelParameterBaseInterface extends ModelParameterBase {
 // 子クラスの引数として利用できないものを定義する
 export interface HTMLModelParameter extends HTMLModelParameterBaseInterface {
   // JSX形式のエレメント
-  element: JSX.Element;
+  element: JSX.Element | DynamicDrawing;
 }
 
 // クラスに取り込むミックスインを指定する
@@ -38,7 +41,7 @@ export class HTMLModelWrapper extends MixinExtraObject {
   // Webサイトの管理インスタンス
   private _website?: CSS3DObject;
   // JSXのエレメント
-  private _element?: JSX.Element;
+  private _element?: DynamicDrawing;
   // 時間計測用のクロック
   private _clock?: Clock;
   // 経過時間
@@ -87,13 +90,26 @@ export class HTMLModelWrapper extends MixinExtraObject {
    * @returns
    */
   create(parameter: HTMLModelParameter) {
+    // レンダリング関数を作成する
+    if (typeof parameter.element == "function") {
+      // 引数として受け取ったレンダリング関数を格納する
+      this._element = parameter.element;
+    } else {
+      // 引数として受け取ったJSXを固定値として格納する
+      //@ts-ignore
+      this._element = () => {
+        return parameter.element;
+      };
+    }
+
     // Webサイトを作成する
     const website = new CSS3DObject(document.createElement("div"));
-    website.element.innerHTML = renderToStaticMarkup(parameter.element);
+    if (this._element) {
+      website.element.innerHTML = renderToStaticMarkup(this._element());
+    }
 
     // 変数を保持する
     this._website = website;
-    this._element = parameter.element;
     this._clock = new Clock();
     this._deltaTime = 0;
     this._updateSpan = parameter.updateSpan ?? 1.0;
@@ -116,14 +132,23 @@ export class HTMLModelWrapper extends MixinExtraObject {
    * 更新する
    * element: 更新後のJSX Element、未指定の場合は前回と同じJSXで更新をかける
    */
-  public update(element?: JSX.Element) {
+  public update(element?: JSX.Element | DynamicDrawing) {
     // 入力があれば新しい情報に更新する
     if (element) {
-      this._element = element;
+      if (typeof element == "function") {
+        // 動的な更新が可能なコンテンツとして、関数をそのまま設定する
+        this._element = element;
+      } else {
+        // 静的なコンテンツとして登録する
+        //@ts-ignore
+        this._element = () => {
+          return element;
+        };
+      }
     }
     // レコードを更新する
     if (this._element && this._website) {
-      this._website.element.innerHTML = renderToStaticMarkup(this._element);
+      this._website.element.innerHTML = renderToStaticMarkup(this._element());
     }
   }
 

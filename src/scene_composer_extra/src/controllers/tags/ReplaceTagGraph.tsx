@@ -27,8 +27,7 @@ export function ReplaceTagGraph<TBase extends ReplaceTagPluginConstructor>(
         tag.visible = false;
         return new RechartsModelWrapper(
           this.parameter(tag)
-        ).updateRachartsComponent(
-          LineChart,
+        ).updateRachartsComponent(LineChart, () => (
           <>
             <XAxis dataKey="x" />
             <YAxis />
@@ -40,7 +39,7 @@ export function ReplaceTagGraph<TBase extends ReplaceTagPluginConstructor>(
               isAnimationActive={false}
             />
           </>
-        );
+        ));
       }
       return undefined;
     }
@@ -54,8 +53,7 @@ export function ReplaceTagGraph<TBase extends ReplaceTagPluginConstructor>(
         tag.visible = false;
         return new RechartsModelWrapper(
           this.parameter(tag)
-        ).updateRachartsComponent(
-          BarChart,
+        ).updateRachartsComponent(BarChart, () => (
           <>
             <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
             <XAxis dataKey="x" />
@@ -67,7 +65,7 @@ export function ReplaceTagGraph<TBase extends ReplaceTagPluginConstructor>(
               isAnimationActive={false}
             />
           </>
-        );
+        ));
       }
       return undefined;
     }

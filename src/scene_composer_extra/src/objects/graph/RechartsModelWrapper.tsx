@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  DynamicDrawing,
   HTMLModelParameterBaseInterface,
   HTMLModelWrapper,
 } from "../html/HTMLModelWrapper";
@@ -9,19 +10,19 @@ import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 export interface RechartsModelParameter
   extends HTMLModelParameterBaseInterface {
   data?: any[];
-  graph?: JSX.Element;
+  graph?: DynamicDrawing;
   width?: number;
   height?: number;
 }
 /** グラフの可視化クラス */
 export class RechartsModelWrapper extends HTMLModelWrapper {
   private _componentName?: any;
-  private _jsxDefault?: JSX.Element;
+  private _jsxDefault?: DynamicDrawing;
   private _data?: any[];
   /**
    * グラフの表示種別を設定する
    */
-  updateRachartsComponent(componentName: any, jsxDefault: JSX.Element) {
+  updateRachartsComponent(componentName: any, jsxDefault: DynamicDrawing) {
     this._componentName = componentName;
     this._jsxDefault = jsxDefault;
     return this;
@@ -52,20 +53,23 @@ export class RechartsModelWrapper extends HTMLModelWrapper {
     // グラフの表示高さ
     const height = parameter.height ?? 200;
     // グラフのデータ定義
-    const graph: JSX.Element = parameter.graph ?? this._jsxDefault ?? (
-      <>
-        <XAxis dataKey="x" />
-        <YAxis />
-        <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-        <Line type="monotone" dataKey="y" stroke="#8884d8" />
-      </>
-    );
+    const graph: DynamicDrawing =
+      parameter.graph ??
+      this._jsxDefault ??
+      (() => (
+        <>
+          <XAxis dataKey="x" />
+          <YAxis />
+          <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
+          <Line type="monotone" dataKey="y" stroke="#8884d8" />
+        </>
+      ));
     // グラフの表示データを参照
     this._data = parameter.data;
     // グラフをHTMLとして作成、表示する
     super.create({
       ...parameter,
-      element: (
+      element: () => (
         <div
           style={{
             padding: "1rem",
@@ -80,7 +84,7 @@ export class RechartsModelWrapper extends HTMLModelWrapper {
               height: height,
               data: this.data,
             },
-            graph
+            graph()
           )}
         </div>
       ),
