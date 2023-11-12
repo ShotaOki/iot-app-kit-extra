@@ -46,6 +46,11 @@ export class HTMLModelWrapper extends MixinExtraObject {
   // 更新周期
   private _updateSpan: number = 1.0;
 
+  /** デフォルトのスケール: スケール未指定時に設定する */
+  get defaultScale() {
+    return 0.0025;
+  }
+
   /**
    * レンダラを初期化する
    *

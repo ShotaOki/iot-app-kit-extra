@@ -53,6 +53,11 @@ export class MMDModelWrapper extends MixinExtraObject {
   // アニメーションヘルパー
   private _animationHelper?: MMDAnimationHelper;
 
+  /** デフォルトのスケール: スケール未指定時に設定する */
+  get defaultScale() {
+    return 0.1;
+  }
+
   /**
    * 初期化する
    *

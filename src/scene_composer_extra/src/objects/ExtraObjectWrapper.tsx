@@ -5,6 +5,7 @@ import { degToRad } from "three/src/math/MathUtils";
 import { isBillboardMixinObject } from "../mixin/MixinBillboard";
 import { isLoadObserverMixinObject } from "../mixin/MixinLoadObserver";
 
+/** 位置の絶対/相対値指定 */
 export interface ModelParameterVector3 {
   x?: number;
   y?: number;
@@ -12,10 +13,23 @@ export interface ModelParameterVector3 {
   isAbsolute?: boolean;
 }
 
+/** スケールの絶対/相対値指定 */
+export interface ModelParameterScaler {
+  scaler: number;
+  isAbsolute?: boolean;
+}
+
+/** スケールがModelParameterScaleで定義されたのならTrueを返す */
+export function isModelParameterScaler(
+  object: any
+): object is ModelParameterScaler {
+  return object !== undefined && "scaler" in object;
+}
+
 /** モデルの共通パラメータ */
 export interface ModelParameterBase {
   // モデルの表示サイズ
-  scale?: number;
+  scale?: number | ModelParameterScaler;
   // モデルの表示アングル(ヨー方向、単位はDegree)
   angle?: number;
   // 位置座標
@@ -122,11 +136,28 @@ export class ExtraObjectWrapper implements ExtraObjectInterface {
         model.rotation.z
       );
     }
-    if (parameter.scale !== undefined) {
-      // スケールの指定があれば反映する
+    if (parameter.scale !== undefined && typeof parameter.scale == "number") {
+      // 数値で直接スケールの指定があれば絶対値として反映する
       model.scale.set(parameter.scale, parameter.scale, parameter.scale);
+    } else if (isModelParameterScaler(parameter.scale)) {
+      let scaleMultiply = this.defaultScale;
+      if (parameter.scale.isAbsolute ?? false) {
+        // スケールの絶対値指定があれば反映する
+        scaleMultiply = 1.0;
+      }
+      // スカラーを反映する
+      model.scale.set(
+        scaleMultiply * parameter.scale.scaler,
+        scaleMultiply * parameter.scale.scaler,
+        scaleMultiply * parameter.scale.scaler
+      );
     } else {
-      model.scale.copy(this._scale);
+      // スケールが未指定であれば反映する
+      model.scale.set(
+        this.defaultScale * this._scale.x,
+        this.defaultScale * this._scale.y,
+        this.defaultScale * this._scale.z
+      );
     }
     if (parameter.position !== undefined) {
       // 絶対位置指定: trueであればタグの位置に関わらず指定する
@@ -182,6 +213,11 @@ export class ExtraObjectWrapper implements ExtraObjectInterface {
   /** Object3Dのオブジェクトを返却する */
   get object() {
     return this._object;
+  }
+
+  /** デフォルトのスケール: オブジェクトによって異なる */
+  get defaultScale() {
+    return 1.0;
   }
 
   /** アニメーションループ */
