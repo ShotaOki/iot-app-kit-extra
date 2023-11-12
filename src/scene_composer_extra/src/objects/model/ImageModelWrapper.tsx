@@ -5,6 +5,7 @@ import {
 import { Texture, TextureLoader } from "three/src/Three";
 import ThreeMeshUI from "three-mesh-ui";
 import { MixinLoadObserver } from "../../mixin/MixinLoadObserver";
+import { MixinBillboard } from "../../mixin/MixinBillboard";
 
 const IMAGE_LOADED_KEY = "imageLoaded";
 
@@ -15,14 +16,17 @@ export interface ImageModelParameter extends ModelParameterBase {
   width: number;
   // 画像の高さ
   height: number;
+  // ビルボード
+  isBillboard?: boolean;
 }
 
 // クラスに取り込むミックスインを指定する
 // prettier-ignore
 const MixinExtraObject = /** */
 MixinLoadObserver( // ローディングの完了を監視する
+MixinBillboard( // 必ずこちら側を向くビルボード機能を定義する
   ExtraObjectWrapper
-);
+));
 
 /**
  * 2D画像、または2D画像の配列を表示するクラス
@@ -59,6 +63,12 @@ export class ImageModelWrapper extends MixinExtraObject {
 
     // 画像を表示する
     this.setImage(parameter.imagePath);
+
+    // 必ずこちら側を向く機能を定義する
+    this._billboardInitialize({
+      isEnabled: parameter.isBillboard ?? false,
+      target: imageBlock,
+    });
 
     return this;
   }

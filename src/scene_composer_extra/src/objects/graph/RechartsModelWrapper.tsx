@@ -1,10 +1,13 @@
 import React from "react";
-import { HTMLModelWrapper } from "../html/HTMLModelWrapper";
-import { ModelParameterBase } from "../ExtraObjectWrapper";
+import {
+  HTMLModelParameterBaseInterface,
+  HTMLModelWrapper,
+} from "../html/HTMLModelWrapper";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
-/** TagControllerから実体にする際に呼び出すパラメータ */
-export interface RechartsModelParameter extends ModelParameterBase {
+/** TagControllerから実体にする際に呼び出すパラメータ: Elementの外からの上書きは禁止する */
+export interface RechartsModelParameter
+  extends HTMLModelParameterBaseInterface {
   data?: any[];
   graph?: JSX.Element;
   width?: number;

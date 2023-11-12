@@ -14,6 +14,7 @@ import {
 import { AnimationParameter } from "../../types/DataType";
 import { NoLightingShader } from "../../shader/NoLightingShader";
 import { MixinLoadObserver } from "../../mixin/MixinLoadObserver";
+import { MixinBillboard } from "../../mixin/MixinBillboard";
 
 const ATRAS_LOADED_KEY = "atrasLoaded";
 
@@ -35,14 +36,17 @@ export interface TextureAtrasVideoParameter extends ModelParameterBase {
   height: number;
   // アニメーションの実行速度：0でアニメーションしない
   fps?: number;
+  // ビルボード
+  isBillboard?: boolean;
 }
 
 // クラスに取り込むミックスインを指定する
 // prettier-ignore
 const MixinExtraObject = /** */
 MixinLoadObserver( // ローディングの完了を監視する
+MixinBillboard( // 必ずこちら側を向くビルボード機能を定義する
   ExtraObjectWrapper
-);
+));
 
 /**
  * 2D画像、または2D画像の配列を表示するクラス
@@ -133,6 +137,12 @@ export class TextureAtrasVideoWrapper extends MixinExtraObject {
 
     // 画像を表示する
     this.setImage(parameter.imagePath);
+
+    // 必ずこちら側を向くビルボード機能を定義する
+    this._billboardInitialize({
+      isEnabled: parameter.isBillboard ?? false,
+      target: this._imageBlock,
+    });
 
     return this;
   }

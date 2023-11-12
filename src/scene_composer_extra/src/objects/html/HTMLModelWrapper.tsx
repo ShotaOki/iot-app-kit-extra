@@ -9,14 +9,32 @@ import {
 import { renderToStaticMarkup } from "react-dom/server";
 import { AnimationParameter } from "../../types/DataType";
 import { Clock } from "three/src/Three";
+import { MixinBillboard } from "../../mixin/MixinBillboard";
 
-export interface HTMLModelParameter extends ModelParameterBase {
-  // JSX形式のエレメント
-  element: JSX.Element;
+// このラッパの初期化パラメータ:
+// 子クラスの引数として利用できないものを除いたパラメータを指定する
+export interface HTMLModelParameterBaseInterface extends ModelParameterBase {
   // 更新周期: 単位: 秒
   updateSpan?: number;
+  // ビルボード
+  isBillboard?: boolean;
 }
-export class HTMLModelWrapper extends ExtraObjectWrapper {
+
+// このラッパの初期化パラメータ:
+// 子クラスの引数として利用できないものを定義する
+export interface HTMLModelParameter extends HTMLModelParameterBaseInterface {
+  // JSX形式のエレメント
+  element: JSX.Element;
+}
+
+// クラスに取り込むミックスインを指定する
+// prettier-ignore
+const MixinExtraObject = /** */
+MixinBillboard( // 必ずこちら側にオブジェクトを向ける
+  ExtraObjectWrapper
+);
+
+export class HTMLModelWrapper extends MixinExtraObject {
   // Webサイトの管理インスタンス
   private _website?: CSS3DObject;
   // JSXのエレメント
@@ -80,11 +98,17 @@ export class HTMLModelWrapper extends ExtraObjectWrapper {
     /** 画面に配置する */
     this.add(website);
 
+    // 画面をこちら側に向ける
+    this._billboardInitialize({
+      isEnabled: parameter.isBillboard ?? false,
+      target: website,
+    });
+
     return this;
   }
 
-  /** 
-   * 更新する 
+  /**
+   * 更新する
    * element: 更新後のJSX Element、未指定の場合は前回と同じJSXで更新をかける
    */
   public update(element?: JSX.Element) {
