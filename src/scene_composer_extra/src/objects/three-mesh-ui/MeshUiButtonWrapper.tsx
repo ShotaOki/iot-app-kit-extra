@@ -7,6 +7,7 @@ import { AnimationParameter } from "../../types/DataType";
 import { getState } from "../../utility/SceneUtility";
 import { Raycaster, Color, Camera, TextureLoader } from "three/src/Three";
 import { FontData } from "../../types/MeshUiFont";
+import { MixinBillboard } from "../../mixin/MixinBillboard";
 
 export interface MeshUiButtonColor {
   backgroundColor: Color;
@@ -16,6 +17,13 @@ export interface MeshUiButtonColor {
 export interface MeshUiButtonFileContents {
   filePath: string;
 }
+
+// クラスに取り込むミックスインを指定する
+// prettier-ignore
+const MixinExtraObject = /** */
+MixinBillboard( // 必ずこちら側にオブジェクトを向ける
+  ExtraObjectWrapper
+);
 
 export interface MeshUiButtonParameter extends ModelParameterBase {
   // テキスト, またはコンテンツ
@@ -28,8 +36,10 @@ export interface MeshUiButtonParameter extends ModelParameterBase {
   height: number;
   // フォントデータ
   font?: FontData;
+  // ビルボード
+  isBillboard?: boolean;
 }
-export class MeshUiButtonWrapper extends ExtraObjectWrapper {
+export class MeshUiButtonWrapper extends MixinExtraObject {
   private _camera: Camera | null = null;
   private _objsToTest: Array<ThreeMeshUI.Block> = [];
 
@@ -127,6 +137,12 @@ export class MeshUiButtonWrapper extends ExtraObjectWrapper {
     /** カメラを参照する */
     const { camera } = getState(this._rootScene);
     that._camera = camera;
+
+    // 必要があれば、必ずカメラの方向にオブジェクトを向ける
+    this._billboardInitialize({
+      isEnabled: parameter.isBillboard ?? false,
+      target: container,
+    });
 
     return this;
   }

@@ -16,6 +16,27 @@ class LoadObserverObject {
   }
 }
 
+// 外部に公開するMixinの関数
+export interface LoadObserverMixinInterface {
+  _loadObserverAwake(): void;
+  progressObserver(key: string): void;
+  sendMessageToLoadObserver(key: string): void;
+}
+
+// Mixinの継承判定
+export function isLoadObserverMixinObject(
+  object: any
+): object is LoadObserverMixinInterface {
+  if (
+    "progressObserver" in object &&
+    "sendMessageToLoadObserver" in object &&
+    "_loadObserverAwake" in object
+  ) {
+    return true;
+  }
+  return false;
+}
+
 // LoadObserverの初期化情報
 export interface MixinLoadObserverParameter {
   requiredParameter: string[];
@@ -25,7 +46,7 @@ export interface MixinLoadObserverParameter {
  * 読み込みの完了オブザーバを実装するMixin
  */
 export function MixinLoadObserver<TBase extends Constructor>(Base: TBase) {
-  return class LoadObserver extends Base {
+  return class LoadObserver extends Base implements LoadObserverMixinInterface {
     // メッシュの読み込み完了状態の保持フラグ
     public _loadObserverStatus: LoadObserverObject = new LoadObserverObject([]);
 

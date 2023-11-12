@@ -2,6 +2,8 @@ import { IAnchorComponent } from "@iot-app-kit/scene-composer";
 import { Vector3, Euler, Scene, Object3D } from "three/src/Three";
 import { AnimationParameter, SystemLoadingStatus } from "../types/DataType";
 import { degToRad } from "three/src/math/MathUtils";
+import { isBillboardMixinObject } from "../mixin/MixinBillboard";
+import { isLoadObserverMixinObject } from "../mixin/MixinLoadObserver";
 
 export interface ModelParameterVector3 {
   x?: number;
@@ -185,6 +187,10 @@ export class ExtraObjectWrapper implements ExtraObjectInterface {
   /** アニメーションループ */
   callAnimationLoop(parameter: AnimationParameter) {
     this.executeAnimationLoop(parameter);
+    // MixinでBillboardを継承しているのなら、MixinのAwakeを呼び出す
+    if (isBillboardMixinObject(this)) {
+      this.executeBillboardAnimation(parameter, this.object);
+    }
   }
 
   /**
@@ -218,10 +224,9 @@ export class ExtraObjectWrapper implements ExtraObjectInterface {
 
   /** create完了通知関数 */
   awake() {
-    const that = this as any;
-    if (typeof that._loadObserverAwake == "function") {
-      // MixinでLoadObserverを継承しているのなら、MixinのAwakeを呼び出す
-      that._loadObserverAwake();
+    // MixinでLoadObserverを継承しているのなら、MixinのAwakeを呼び出す
+    if (isLoadObserverMixinObject(this)) {
+      this._loadObserverAwake();
     } else {
       // onLoadを実行する
       // 実行する必要がないのなら、子クラスでoverrideする

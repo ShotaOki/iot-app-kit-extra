@@ -12,16 +12,23 @@ import {
 } from "three/src/Three";
 import ThreeMeshUI from "three-mesh-ui";
 import { AnimationParameter } from "../../types/DataType";
+import { MixinBillboard } from "../../mixin/MixinBillboard";
 
 const LOADING_ROTATE_SPEED = 0.06;
+
+// クラスに取り込むミックスインを指定する
+// prettier-ignore
+const MixinExtraObject = /** */
+MixinBillboard( // 必ずこちら側にオブジェクトを向ける
+  ExtraObjectWrapper
+);
 
 export interface MeshUiLoadingParameter extends ModelParameterBase {
   size?: number;
   lineWidth?: number;
 }
-export class MeshUiLoadingWrapper extends ExtraObjectWrapper {
+export class MeshUiLoadingWrapper extends MixinExtraObject {
   _progressMesh?: Object3D;
-  _progressBase?: Object3D;
 
   /**
    * 初期化する
@@ -83,16 +90,20 @@ export class MeshUiLoadingWrapper extends ExtraObjectWrapper {
     mesh.position.setZ(0.0001);
     container.add(mesh);
 
-    this._progressBase = container;
     this._progressMesh = mesh;
+
+    // 必ずカメラの方向にオブジェクトを向ける
+    this._billboardInitialize({
+      isEnabled: true,
+      target: container,
+    });
 
     return this;
   }
 
   /** アニメーションループ */
   executeAnimationLoop(parameter: AnimationParameter) {
-    if (this._progressMesh && this._progressBase) {
-      this._progressBase.quaternion.copy(parameter.cameraAngle);
+    if (this._progressMesh) {
       this._progressMesh.rotateZ(-LOADING_ROTATE_SPEED);
     }
   }

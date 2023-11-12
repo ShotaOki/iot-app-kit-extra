@@ -6,6 +6,7 @@ import { Color } from "three/src/Three";
 import ThreeMeshUI from "three-mesh-ui";
 import { AnimationParameter } from "../../types/DataType";
 import { FontData } from "../../types/MeshUiFont";
+import { MixinBillboard } from "../../mixin/MixinBillboard";
 
 export interface MeshUiButtonColor {
   backgroundColor: Color;
@@ -17,8 +18,18 @@ export interface MeshUiTextParameter extends ModelParameterBase {
   content: string;
   // フォントデータ
   font?: FontData;
+  // ビルボード
+  isBillboard?: boolean;
 }
-export class MeshUiTextWrapper extends ExtraObjectWrapper {
+
+// クラスに取り込むミックスインを指定する
+// prettier-ignore
+const MixinExtraObject = /** */
+MixinBillboard( // 必ずこちら側にオブジェクトを向ける
+  ExtraObjectWrapper
+);
+
+export class MeshUiTextWrapper extends MixinExtraObject {
   private _content?: any;
   private _onAnimatingEvent?: (text: MeshUiTextWrapper) => void;
 
@@ -59,6 +70,12 @@ export class MeshUiTextWrapper extends ExtraObjectWrapper {
     container.add(text);
 
     this._content = text;
+
+    // 必要があれば、必ずカメラの方向にオブジェクトを向ける
+    this._billboardInitialize({
+      isEnabled: parameter.isBillboard ?? false,
+      target: container,
+    });
 
     return this;
   }
