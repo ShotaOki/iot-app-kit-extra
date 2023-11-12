@@ -30,10 +30,17 @@ class DummyTag {
   }
 }
 
+// クラスに取り込むミックスインを指定する
+// prettier-ignore
+const MixinExtraObjectWrapper = /** GroupWrapperの継承元クラス */
+MixinAnimation( // アニメーションを有効にする
+  ExtraObjectWrapper
+);
+
 /**
  * 複数のオブジェクトを一つのタグに紐づけるクラス
  */
-export class GroupWrapper extends MixinAnimation(ExtraObjectWrapper) {
+export class GroupWrapper extends MixinExtraObjectWrapper {
   // 子オブジェクト
   protected _children: { [key: string]: ExtraObjectWrapper } = {};
   protected _animationController?: Object3D;

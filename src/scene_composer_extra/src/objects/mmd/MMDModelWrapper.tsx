@@ -14,6 +14,7 @@ import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader";
 import { MMDAnimationHelper } from "three/examples/jsm/animation/MMDAnimationHelper";
 import { AnimationParameter, SystemLoadingStatus } from "../../types/DataType";
 import { NoLightingShader } from "../../shader/NoLightingShader";
+import { MixinLoadObserver } from "../../mixin/MixinLoadObserver";
 
 export interface MMDModelParameter extends ModelParameterBase {
   // MMDモデルのファイルパス
@@ -30,20 +31,17 @@ export type StateChangeEvent = (
   state: string | number
 ) => string[];
 
-/** 読み込み完了状態の保持クラス */
-class LoadObserver {
-  // メッシュの読み込み完了フラグ
-  public meshLoaded: boolean;
-  // onload関数の完了済みフラグ
-  public isOnLoadCalled: boolean;
+// クラスに取り込むミックスインを指定する
+// prettier-ignore
+const MixinExtraObject = /** */
+MixinLoadObserver( // ローディングの完了を監視する
+  ExtraObjectWrapper
+);
 
-  constructor() {
-    this.meshLoaded = false;
-    this.isOnLoadCalled = false;
-  }
-}
+const MOTION_LOADED_KEY = "motionLoaded";
+const MESH_LOADED_KEY = "meshLoaded";
 
-export class MMDModelWrapper extends ExtraObjectWrapper {
+export class MMDModelWrapper extends MixinExtraObject {
   // MMDモデル
   private _mesh?: MMDMesh;
   // 状態変更イベント
@@ -54,8 +52,6 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
   private _clock?: Clock;
   // アニメーションヘルパー
   private _animationHelper?: MMDAnimationHelper;
-  // メッシュの読み込み完了状態の保持フラグ
-  private _mmdLoadedObserver: LoadObserver = new LoadObserver();
 
   /**
    * 初期化する
@@ -74,87 +70,77 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
     // 読み込みが完了するまで、ダミーのオブジェクトを保持する
     that._object = new Object3D();
     // 読み込みの完了を検知するオブザーバ
-    that._mmdLoadedObserver = new Proxy(new LoadObserver(), {
-      set(obj, prop, newval) {
-        // メッシュの読み込み完了通知が更新されたのなら、onLoad通知を実施する
-        if (prop == "meshLoaded" && newval == true && !obj.isOnLoadCalled) {
-          if (that._onLoadFunction) {
-            // onLoad通知関数の実行済みフラグを立てる
-            obj.isOnLoadCalled = true;
-            // 完了を通知する
-            that._onLoadFunction();
-          }
-        }
-        return true;
-      },
-    });
+    const requiredParameter = parameter.useMotionList
+      ? [MESH_LOADED_KEY, MOTION_LOADED_KEY] // モーション、モデルの両方の読み込みの完了後にOnLoadを実行
+      : [MESH_LOADED_KEY]; // モデルの読み込み完了後にOnLoadを実行
+    this._loadObserverInitiate({ requiredParameter });
     /** 非同期でMMDモデルを取得する */
-    loader
-      .loadAsync(parameter.pmxPath, (progress) => {
-        if (progress.loaded == progress.total) {
-          // 読み込み完了フラグを立てる
-          // Proxyで監視しているため、未実行であればOnLoadFunctionが実行される
-          that._mmdLoadedObserver.meshLoaded = true;
-        }
-      })
-      .then((mesh) => {
-        // 位置情報、大きさ、回転角度をTwinMakerのタグに合わせる
-        this.applyAttitude(mesh, parameter);
-        // 影を表示する
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        mesh.visible = that._object?.visible ?? true;
+    loader.loadAsync(parameter.pmxPath).then((mesh) => {
+      // 位置情報、大きさ、回転角度をTwinMakerのタグに合わせる
+      this.applyAttitude(mesh, parameter);
+      // 影を表示する
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      mesh.visible = that._object?.visible ?? true;
 
-        // TwinMakerに合わせてシェーダを補正する
-        for (let m of mesh.material as Material[]) {
-          // TwinMakerが明るすぎて白飛びするため、MMDに光源の影響を受けないシェーダを使う
-          // ※MotionIndicatorComponent用のシェーダを転用したもの
-          m.onBeforeCompile = (shader) => {
-            shader.fragmentShader = NoLightingShader;
-          };
-          m.needsUpdate = true;
-        }
+      // TwinMakerに合わせてシェーダを補正する
+      for (let m of mesh.material as Material[]) {
+        // TwinMakerが明るすぎて白飛びするため、MMDに光源の影響を受けないシェーダを使う
+        // ※MotionIndicatorComponent用のシェーダを転用したもの
+        m.onBeforeCompile = (shader) => {
+          shader.fragmentShader = NoLightingShader;
+        };
+        m.needsUpdate = true;
+      }
 
-        // 読み込んだMMDモデルを表示する
-        this.add(mesh);
-        this._mesh = mesh;
+      // 読み込んだMMDモデルを表示する
+      this.add(mesh);
+      this._mesh = mesh;
 
-        // 状態を初期化する
-        that.stateChange(SystemLoadingStatus.Init);
+      // 状態を初期化する
+      that.stateChange(SystemLoadingStatus.Init);
 
-        // モーションを読み込む
-        if (parameter.useMotionList) {
-          const motionKeyList = Object.keys(parameter.useMotionList);
-          Promise.all(
-            motionKeyList.map(
-              (key) =>
-                new Promise((resolve) =>
-                  // アニメーションを非同期で読み込む
-                  new MMDLoader().loadAnimation(
-                    parameter.useMotionList![key],
-                    mesh,
-                    (animation) => {
-                      // 非同期読み込みの完了を通知
-                      resolve(animation);
-                    }
-                  )
+      // メッシュの登録完了を通知する
+      this.sendMessageToLoadObserver(MESH_LOADED_KEY);
+
+      // モーションを読み込む
+      if (parameter.useMotionList) {
+        const motionKeyList = Object.keys(parameter.useMotionList);
+        Promise.all(
+          motionKeyList.map(
+            (key) =>
+              new Promise((resolve) =>
+                // アニメーションを非同期で読み込む
+                new MMDLoader().loadAnimation(
+                  parameter.useMotionList![key],
+                  mesh,
+                  (animation) => {
+                    // 非同期読み込みの完了を通知
+                    resolve(animation);
+                  }
                 )
-            )
-          ).then((results) => {
+              )
+          )
+        )
+          .then((results) => {
             const useMotionList: { [key: string]: AnimationClip } = {};
             results.forEach((motion, index) => {
               useMotionList[motionKeyList[index]] = motion as AnimationClip;
             });
             this._flagLoaded = true;
             this._useMotionList = useMotionList;
+          })
+          .finally(() => {
+            // アニメーションの登録完了を通知する
+            this.sendMessageToLoadObserver(MOTION_LOADED_KEY);
           });
-        } else {
-          this._flagLoaded = true;
-        }
+      } else {
+        this._flagLoaded = true;
+      }
 
-        // アニメーションを実行する
-        that._clock = new Clock();
-      });
+      // アニメーションを実行する
+      that._clock = new Clock();
+    });
 
     return this;
   }
@@ -207,18 +193,6 @@ export class MMDModelWrapper extends ExtraObjectWrapper {
     if (this._clock) {
       const delta = this._clock.getDelta();
       if (this._animationHelper) this._animationHelper.update(delta);
-    }
-  }
-
-  /** createの完了通知関数 */
-  awake() {
-    // Meshの読み込みが完了しているのなら、完了通知関数を実行する
-    if (this._mmdLoadedObserver.meshLoaded) {
-      if (this._onLoadFunction) {
-        // onLoad通知関数の実行済みフラグを立てる
-        this._mmdLoadedObserver.isOnLoadCalled = true;
-        this._onLoadFunction();
-      }
     }
   }
 }

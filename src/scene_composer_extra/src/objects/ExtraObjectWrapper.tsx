@@ -218,11 +218,17 @@ export class ExtraObjectWrapper implements ExtraObjectInterface {
 
   /** create完了通知関数 */
   awake() {
-    // onLoadを実行する
-    // 実行する必要がないのなら、子クラスでoverrideする
-    if (this._onLoadFunction) {
-      // 完了通知関数を実行する
-      this._onLoadFunction();
+    const that = this as any;
+    if (typeof that._loadObserverAwake == "function") {
+      // MixinでLoadObserverを継承しているのなら、MixinのAwakeを呼び出す
+      that._loadObserverAwake();
+    } else {
+      // onLoadを実行する
+      // 実行する必要がないのなら、子クラスでoverrideする
+      if (this._onLoadFunction) {
+        // 完了通知関数を実行する
+        this._onLoadFunction();
+      }
     }
   }
 }

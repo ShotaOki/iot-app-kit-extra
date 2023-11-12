@@ -1,6 +1,5 @@
 import { Object3D, Clock } from "three/src/Three";
-
-type Constructor = new (...args: any[]) => {};
+import { Constructor } from "./MixinBase";
 
 export interface AnimationInfo {
   step: number;
