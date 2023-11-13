@@ -1,4 +1,8 @@
 import { Constructor } from "./MixinBase";
+import {
+  MixinEventNotifierEmitter,
+  isMixinEventNotifierEmitter,
+} from "./MixinEventNotifier";
 
 /** 読み込み完了状態の保持クラス */
 class LoadObserverObject {
@@ -55,7 +59,7 @@ export function MixinLoadObserver<TBase extends Constructor>(Base: TBase) {
      * @param parameter
      */
     _loadObserverInitiate(parameter: MixinLoadObserverParameter) {
-      const that = this as any;
+      const that = this;
       // 読み込みの完了を検知するオブザーバ
       this._loadObserverStatus = new Proxy(
         new LoadObserverObject(parameter.requiredParameter),
@@ -68,11 +72,11 @@ export function MixinLoadObserver<TBase extends Constructor>(Base: TBase) {
               newval.length == obj.requiredParameter.length &&
               !obj.isOnLoadCalled
             ) {
-              if (that._onLoadFunction) {
+              if (isMixinEventNotifierEmitter(that)) {
                 // onLoad通知関数の実行済みフラグを立てる
                 obj.isOnLoadCalled = true;
                 // 完了を通知する
-                that._onLoadFunction();
+                that.emitOnLoad();
               }
             }
             //@ts-ignore
@@ -86,16 +90,15 @@ export function MixinLoadObserver<TBase extends Constructor>(Base: TBase) {
      * awake関数が実行されたときの初期化処理
      */
     _loadObserverAwake() {
-      const that = this as any;
       // Meshの読み込みが完了しているのなら、完了通知関数を実行する
       if (
         this._loadObserverStatus.requiredParameter.length ==
         this._loadObserverStatus.loadedParameter.length
       ) {
-        if (that._onLoadFunction) {
+        if (isMixinEventNotifierEmitter(this)) {
           // onLoad通知関数の実行済みフラグを立てる
           this._loadObserverStatus.isOnLoadCalled = true;
-          that._onLoadFunction();
+          this.emitOnLoad();
         }
       }
     }

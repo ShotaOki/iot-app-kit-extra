@@ -24,6 +24,10 @@ export default defineConfig((mode) => {
           replacement: "rollup-plugin-node-polyfills/polyfills/path",
         },
         {
+          find: "events",
+          replacement: "rollup-plugin-node-polyfills/polyfills/events",
+        },
+        {
           find: /^@iot-app-kit/,
           replacement: path.join(__dirname, "node_modules/@iot-app-kit"),
         },

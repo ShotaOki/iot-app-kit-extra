@@ -4,6 +4,11 @@ import { AnimationParameter, SystemLoadingStatus } from "../types/DataType";
 import { degToRad } from "three/src/math/MathUtils";
 import { isBillboardMixinObject } from "../mixin/MixinBillboard";
 import { isLoadObserverMixinObject } from "../mixin/MixinLoadObserver";
+import {
+  MixinEventNotifier,
+  MixinEventNotifierEmitter,
+  MixinEventNotifierInterface,
+} from "../mixin/MixinEventNotifier";
 
 /** 位置の絶対/相対値指定 */
 export interface ModelParameterVector3 {
@@ -54,7 +59,9 @@ export interface ExtraObjectWrapperParameter {
 /**
  * 外部から呼び出し可能なExtraObjectの情報
  */
-export interface ExtraObjectInterface {
+export interface ExtraObjectInterface
+  extends MixinEventNotifierInterface,
+    MixinEventNotifierEmitter {
   /** 読み込みの完了フラグ */
   get isLoaded(): boolean;
   /** Object3Dのオブジェクトを返却する */
@@ -67,12 +74,13 @@ export interface ExtraObjectInterface {
   stateChange(newState: string | number): void;
   /** create完了通知関数 */
   awake(): void;
-  /** 読み込み完了通知の追加 */
-  onLoad(onLoadedFunction: () => void): ExtraObjectWrapper;
 }
 
 /** ライブラリ内部で利用できるExtraObjectの情報 */
-export class ExtraObjectWrapper implements ExtraObjectInterface {
+export class ExtraObjectWrapper
+  extends MixinEventNotifier(Object)
+  implements ExtraObjectInterface
+{
   // 表示位置
   protected _position: Vector3;
   // 回転角度
@@ -91,10 +99,9 @@ export class ExtraObjectWrapper implements ExtraObjectInterface {
   protected _object: Object3D | undefined;
   // オプション: 親オブジェクト（未設定であればルートシーンを親とする）
   protected _parentObject: Object3D | undefined;
-  // オプション: 読み込み完了通知関数
-  protected _onLoadFunction: (() => void) | undefined;
 
   constructor(parameter: ExtraObjectWrapperParameter) {
+    super();
     this._rootScene = parameter.rootScene;
     this._position = parameter.position;
     this._rotate = parameter.rotate;
@@ -104,6 +111,7 @@ export class ExtraObjectWrapper implements ExtraObjectInterface {
     this._flagLoaded = false;
     this._object = undefined;
     this._parentObject = parameter.parentObject;
+    this.eventNotifierInitialize();
   }
 
   /** 子オブジェクトを追加する */
@@ -220,9 +228,14 @@ export class ExtraObjectWrapper implements ExtraObjectInterface {
     return 1.0;
   }
 
-  /** アニメーションループ */
+  /**
+   * アニメーションループ
+   * onTickで通知する
+   */
   callAnimationLoop(parameter: AnimationParameter) {
     this.executeAnimationLoop(parameter);
+    // Tickの通知関数を呼び出す
+    this.emitTick();
     // MixinでBillboardを継承しているのなら、MixinのAwakeを呼び出す
     if (isBillboardMixinObject(this)) {
       this.executeBillboardAnimation(parameter, this.object);
@@ -231,6 +244,7 @@ export class ExtraObjectWrapper implements ExtraObjectInterface {
 
   /**
    * 状態を変更する
+   * onUpdateStateで通知する
    * @param newState 次の状態
    */
   stateChange(newState: string | number) {
@@ -249,16 +263,16 @@ export class ExtraObjectWrapper implements ExtraObjectInterface {
     }
     // 状態を更新する
     this._state = newState;
+    // 状態の変更を通知する
+    this.emitUpdateState(newState);
+    // 子クラスに状態の変更を伝達する
     this.receivedChangeState(newState);
   }
 
-  /** 読み込み完了通知の追加 */
-  onLoad(onLoadedFunction: () => void) {
-    this._onLoadFunction = onLoadedFunction;
-    return this;
-  }
-
-  /** create完了通知関数 */
+  /**
+   * create完了通知関数
+   * onLoadで通知する
+   */
   awake() {
     // MixinでLoadObserverを継承しているのなら、MixinのAwakeを呼び出す
     if (isLoadObserverMixinObject(this)) {
@@ -266,10 +280,7 @@ export class ExtraObjectWrapper implements ExtraObjectInterface {
     } else {
       // onLoadを実行する
       // 実行する必要がないのなら、子クラスでoverrideする
-      if (this._onLoadFunction) {
-        // 完了通知関数を実行する
-        this._onLoadFunction();
-      }
+      this.emitOnLoad();
     }
   }
 }

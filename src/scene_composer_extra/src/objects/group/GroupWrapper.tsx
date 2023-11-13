@@ -95,13 +95,22 @@ export class GroupWrapper extends MixinExtraObjectWrapper {
   public showSingleChild(key: string) {
     this._visibleChildName = [];
     Object.keys(this._children).forEach((k) => {
-      const object = this._children[k].object;
+      const wrapper = this._children[k];
+      const object = wrapper.object;
       if (object) {
         if (k == key) {
-          object.visible = true;
+          // 非表示なら表示中に切り替え、通知する
+          if (object.visible == false) {
+            object.visible = true;
+            wrapper.emitVisible();
+          }
           this._visibleChildName.push(k);
         } else {
-          object.visible = false;
+          // 表示中ならば非表示に切り替え、通知する
+          if (object.visible == true) {
+            object.visible = false;
+            wrapper.emitHide();
+          }
         }
       }
     });
@@ -111,9 +120,14 @@ export class GroupWrapper extends MixinExtraObjectWrapper {
   public showAllChild() {
     this._visibleChildName = [];
     Object.keys(this._children).forEach((k) => {
-      const object = this._children[k].object;
+      const wrapper = this._children[k];
+      const object = wrapper.object;
       if (object) {
-        object.visible = true;
+        // 非表示であれば表示に切り替え、更新を通知する
+        if (object.visible == false) {
+          object.visible = true;
+          wrapper.emitVisible();
+        }
         this._visibleChildName.push(k);
       }
     });
