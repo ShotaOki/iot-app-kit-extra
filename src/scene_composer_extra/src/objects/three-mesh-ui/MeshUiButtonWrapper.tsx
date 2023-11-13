@@ -93,11 +93,11 @@ export class MeshUiButtonWrapper extends MixinExtraObject {
     /** コンテンツの内容に合わせてデータを設定する */
     if (typeof parameter.content === "string") {
       this._content = new ThreeMeshUI.Text({});
+      button.add(this._content);
     } else {
-      this._content = new ThreeMeshUI.InlineBlock({});
+      this._content = button;
     }
     this.setContent(parameter.content);
-    button.add(this._content);
 
     /**
      * 状態変更イベントを登録する
