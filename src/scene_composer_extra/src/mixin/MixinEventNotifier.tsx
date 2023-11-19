@@ -58,65 +58,65 @@ export function MixinEventNotifier<TBase extends Constructor>(Base: TBase) {
     extends Base
     implements MixinEventNotifierInterface, MixinEventNotifierEmitter
   {
-    _eventEmitter: EventEmitter = new EventEmitter();
-    _eventUUID: string = "";
+    #_eventEmitter: EventEmitter = new EventEmitter();
+    #_eventUUID: string = "";
     eventNotifierInitialize() {
-      this._eventEmitter = new EventEmitter();
-      this._eventUUID = generateUUID();
+      this.#_eventEmitter = new EventEmitter();
+      this.#_eventUUID = generateUUID();
     }
 
     emitUpdateState(parameter: UpdateStateParameter): void {
-      this._eventEmitter.emit(EventName.UPDATE_STATE, parameter);
+      this.#_eventEmitter.emit(EventName.UPDATE_STATE, parameter);
     }
 
     emitTick(): void {
-      this._eventEmitter.emit(EventName.TICK);
+      this.#_eventEmitter.emit(EventName.TICK);
     }
 
     emitOnLoad() {
-      this._eventEmitter.emit(EventName.LOAD);
+      this.#_eventEmitter.emit(EventName.LOAD);
     }
 
     emitVisible(): void {
-      this._eventEmitter.emit(EventName.VISIBLE);
+      this.#_eventEmitter.emit(EventName.VISIBLE);
     }
 
     emitHide(): void {
-      this._eventEmitter.emit(EventName.HIDE);
+      this.#_eventEmitter.emit(EventName.HIDE);
     }
 
     onUpdateState(receiver: (parameter: UpdateStateParameter) => void): this {
-      this._eventEmitter.on(EventName.UPDATE_STATE, receiver);
+      this.#_eventEmitter.on(EventName.UPDATE_STATE, receiver);
       return this;
     }
 
     onTick(receiver: () => void): this {
-      this._eventEmitter.on(EventName.TICK, receiver);
+      this.#_eventEmitter.on(EventName.TICK, receiver);
       return this;
     }
 
     onLoad(receiver: () => void): this {
-      this._eventEmitter.on(EventName.LOAD, receiver);
+      this.#_eventEmitter.on(EventName.LOAD, receiver);
       return this;
     }
 
     onEffect(receiver: () => void): this {
-      this._eventEmitter.on(this._eventUUID, receiver);
+      this.#_eventEmitter.on(this.#_eventUUID, receiver);
       return this;
     }
 
     onVisible(receiver: () => void): this {
-      this._eventEmitter.on(EventName.VISIBLE, receiver);
+      this.#_eventEmitter.on(EventName.VISIBLE, receiver);
       return this;
     }
 
     onHide(receiver: () => void): this {
-      this._eventEmitter.on(EventName.HIDE, receiver);
+      this.#_eventEmitter.on(EventName.HIDE, receiver);
       return this;
     }
 
     effectDependsOn(notifier: UpdateNotifier): this {
-      notifier.bind(() => this._eventEmitter.emit(this._eventUUID));
+      notifier.bind(() => this.#_eventEmitter.emit(this.#_eventUUID));
       return this;
     }
   };

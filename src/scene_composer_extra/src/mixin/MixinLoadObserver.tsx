@@ -1,8 +1,5 @@
 import { Constructor } from "./MixinBase";
-import {
-  MixinEventNotifierEmitter,
-  isMixinEventNotifierEmitter,
-} from "./MixinEventNotifier";
+import { isMixinEventNotifierEmitter } from "./MixinEventNotifier";
 
 /** 読み込み完了状態の保持クラス */
 class LoadObserverObject {
@@ -52,7 +49,7 @@ export interface MixinLoadObserverParameter {
 export function MixinLoadObserver<TBase extends Constructor>(Base: TBase) {
   return class LoadObserver extends Base implements LoadObserverMixinInterface {
     // メッシュの読み込み完了状態の保持フラグ
-    public _loadObserverStatus: LoadObserverObject = new LoadObserverObject([]);
+    #_loadObserverStatus: LoadObserverObject = new LoadObserverObject([]);
 
     /**
      * このMixinの初期化処理
@@ -61,7 +58,7 @@ export function MixinLoadObserver<TBase extends Constructor>(Base: TBase) {
     _loadObserverInitiate(parameter: MixinLoadObserverParameter) {
       const that = this;
       // 読み込みの完了を検知するオブザーバ
-      this._loadObserverStatus = new Proxy(
+      this.#_loadObserverStatus = new Proxy(
         new LoadObserverObject(parameter.requiredParameter),
         {
           set(obj, prop, newval) {
@@ -92,12 +89,12 @@ export function MixinLoadObserver<TBase extends Constructor>(Base: TBase) {
     _loadObserverAwake() {
       // Meshの読み込みが完了しているのなら、完了通知関数を実行する
       if (
-        this._loadObserverStatus.requiredParameter.length ==
-        this._loadObserverStatus.loadedParameter.length
+        this.#_loadObserverStatus.requiredParameter.length ==
+        this.#_loadObserverStatus.loadedParameter.length
       ) {
         if (isMixinEventNotifierEmitter(this)) {
           // onLoad通知関数の実行済みフラグを立てる
-          this._loadObserverStatus.isOnLoadCalled = true;
+          this.#_loadObserverStatus.isOnLoadCalled = true;
           this.emitOnLoad();
         }
       }
@@ -110,13 +107,13 @@ export function MixinLoadObserver<TBase extends Constructor>(Base: TBase) {
     public sendMessageToLoadObserver(key: string) {
       // Requiredで要求されたパラメータで、重複のないリストを作成する
       const currentList = [
-        ...this._loadObserverStatus.loadedParameter,
+        ...this.#_loadObserverStatus.loadedParameter,
         key,
       ].filter((item) =>
-        this._loadObserverStatus.requiredParameter.includes(item)
+        this.#_loadObserverStatus.requiredParameter.includes(item)
       );
       // 重複のないリストを適用する
-      this._loadObserverStatus.loadedParameter = Array.from(
+      this.#_loadObserverStatus.loadedParameter = Array.from(
         new Set(currentList)
       );
     }

@@ -27,12 +27,12 @@ export interface MixinBillboardParameter {
  */
 export function MixinBillboard<TBase extends Constructor>(Base: TBase) {
   return class Billboard extends Base implements BillboardMixinInterface {
-    _isBillboardEnabled: boolean = false;
-    _billboardTarget?: Object3D;
+    #_isBillboardEnabled: boolean = false;
+    #_billboardTarget?: Object3D;
 
     _billboardInitialize(parameter: MixinBillboardParameter) {
-      this._isBillboardEnabled = parameter.isEnabled;
-      this._billboardTarget = parameter.target;
+      this.#_isBillboardEnabled = parameter.isEnabled;
+      this.#_billboardTarget = parameter.target;
     }
 
     /**
@@ -41,7 +41,7 @@ export function MixinBillboard<TBase extends Constructor>(Base: TBase) {
      * @param worldRotation ワールド座標系の回転情報
      * @returns ローカル座標系の回転情報
      */
-    _worldQuaternionToLocalRotate(
+    #_worldQuaternionToLocalRotate(
       targetObject: Object3D,
       worldRotation: Quaternion
     ): Quaternion {
@@ -64,19 +64,19 @@ export function MixinBillboard<TBase extends Constructor>(Base: TBase) {
       parameter: AnimationParameter,
       animationController?: Object3D
     ) {
-      if (this._isBillboardEnabled) {
-        if (this._billboardTarget) {
+      if (this.#_isBillboardEnabled) {
+        if (this.#_billboardTarget) {
           // もし対象が指定されていれば、そのオブジェクトを回転させる
-          this._billboardTarget.quaternion.copy(
-            this._worldQuaternionToLocalRotate(
-              this._billboardTarget,
+          this.#_billboardTarget.quaternion.copy(
+            this.#_worldQuaternionToLocalRotate(
+              this.#_billboardTarget,
               parameter.cameraAngle
             )
           );
         } else if (animationController) {
           // 指定されていないのなら、ベースのオブジェクトを回転させる
           animationController.quaternion.copy(
-            this._worldQuaternionToLocalRotate(
+            this.#_worldQuaternionToLocalRotate(
               animationController,
               parameter.cameraAngle
             )

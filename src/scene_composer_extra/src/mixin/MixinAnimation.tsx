@@ -25,10 +25,10 @@ const FRAME_PER_SECONDS = 60;
 export function MixinAnimation<TBase extends Constructor>(Base: TBase) {
   return class Animatable extends Base {
     // アニメーションのイベントハンドラ
-    _animationHandlerEvent?: () => void;
-    _animationClock?: Clock;
+    #_animationHandlerEvent?: () => void;
+    #_animationClock?: Clock;
     // 拡縮アニメーションのパラメータ
-    _scaleAnimation: AnimationInfo = {
+    #_scaleAnimation: AnimationInfo = {
       step: 0,
       stepEventHandling: 50,
       stepEnd: 100,
@@ -39,13 +39,13 @@ export function MixinAnimation<TBase extends Constructor>(Base: TBase) {
     };
 
     /** アニメーションを開始する */
-    _updateParameterForStart(
+    #_updateParameterForStart(
       handlerEvent: () => void,
       duration: number,
       loop: boolean = false
     ) {
-      if (this._animationClock === undefined) {
-        this._animationClock = new Clock();
+      if (this.#_animationClock === undefined) {
+        this.#_animationClock = new Clock();
       }
       const stepEnd = Math.max(Math.floor(duration * FRAME_PER_SECONDS), 1);
       const animation: AnimationInfo = {
@@ -57,12 +57,12 @@ export function MixinAnimation<TBase extends Constructor>(Base: TBase) {
         loop: loop,
         handlerFlg: true,
       };
-      this._animationHandlerEvent = handlerEvent;
+      this.#_animationHandlerEvent = handlerEvent;
       return animation;
     }
 
     /** アニメーションの進捗状態を計算する */
-    _calcAnimation(animation: AnimationInfo, animationStep: number) {
+    #_calcAnimation(animation: AnimationInfo, animationStep: number) {
       // アニメーションを進める
       // 1.0 -> 0.0 -> 1.0でアニメーションさせるので、円の半周にマッピングする
       const progress = ((1.0 * animation.step) / animation.stepEnd) * Math.PI;
@@ -80,10 +80,10 @@ export function MixinAnimation<TBase extends Constructor>(Base: TBase) {
       if (
         animation.handlerFlg &&
         animation.step >= animation.stepEventHandling &&
-        this._animationHandlerEvent
+        this.#_animationHandlerEvent
       ) {
         animation.handlerFlg = false;
-        this._animationHandlerEvent();
+        this.#_animationHandlerEvent();
       }
       return animation;
     }
@@ -91,16 +91,16 @@ export function MixinAnimation<TBase extends Constructor>(Base: TBase) {
     /** このクラスのアニメーション設定を初期化する */
     public mixinAnimationInitialize() {
       // 変数に格納、初期化する
-      this._scaleAnimation.step = ANIMATION_RANGE_START;
-      this._scaleAnimation.speed = ANIMATION_STATUS_STOP;
-      this._scaleAnimation.value = 1.0;
-      this._scaleAnimation.loop = false;
-      this._animationHandlerEvent = undefined;
+      this.#_scaleAnimation.step = ANIMATION_RANGE_START;
+      this.#_scaleAnimation.speed = ANIMATION_STATUS_STOP;
+      this.#_scaleAnimation.value = 1.0;
+      this.#_scaleAnimation.loop = false;
+      this.#_animationHandlerEvent = undefined;
     }
 
     /** 拡縮アニメーションの実行中であればtrueを返す */
     get isScaleAnimating() {
-      if (this._scaleAnimation.speed >= ANIMATION_STATUS_START) {
+      if (this.#_scaleAnimation.speed >= ANIMATION_STATUS_START) {
         return true;
       }
       return false;
@@ -112,7 +112,7 @@ export function MixinAnimation<TBase extends Constructor>(Base: TBase) {
       duration: number = 1.0,
       loop: boolean = false
     ) {
-      this._scaleAnimation = this._updateParameterForStart(
+      this.#_scaleAnimation = this.#_updateParameterForStart(
         handlerEvent,
         duration,
         loop
@@ -124,23 +124,23 @@ export function MixinAnimation<TBase extends Constructor>(Base: TBase) {
       // アニメーションを実行する
       if (animationController) {
         let animationStep = 1;
-        if (this._animationClock) {
+        if (this.#_animationClock) {
           animationStep = Math.floor(
-            this._animationClock.getDelta() * FRAME_PER_SECONDS
+            this.#_animationClock.getDelta() * FRAME_PER_SECONDS
           );
         }
         // アニメーションを実行する: スケール
-        if (this._scaleAnimation.speed >= ANIMATION_STATUS_START) {
-          this._scaleAnimation = this._calcAnimation(
-            this._scaleAnimation,
+        if (this.#_scaleAnimation.speed >= ANIMATION_STATUS_START) {
+          this.#_scaleAnimation = this.#_calcAnimation(
+            this.#_scaleAnimation,
             animationStep
           );
         }
         // アニメーションの結果を反映する
         animationController.scale.set(
-          this._scaleAnimation.value,
-          this._scaleAnimation.value,
-          this._scaleAnimation.value
+          this.#_scaleAnimation.value,
+          this.#_scaleAnimation.value,
+          this.#_scaleAnimation.value
         );
       }
     }
