@@ -7,8 +7,9 @@ import { isLoadObserverMixinObject } from "../mixin/MixinLoadObserver";
 import {
   MixinEventNotifier,
   MixinEventNotifierEmitter,
-  MixinEventNotifierInterface,
+  EventNotifierInterface,
 } from "../mixin/MixinEventNotifier";
+import { UpdateNotifier } from "../types/SceneState";
 
 /** 位置の絶対/相対値指定 */
 export interface ModelParameterVector3 {
@@ -60,7 +61,7 @@ export interface ExtraObjectWrapperParameter {
  * 外部から呼び出し可能なExtraObjectの情報
  */
 export interface ExtraObjectInterface
-  extends MixinEventNotifierInterface,
+  extends EventNotifierInterface<any>,
     MixinEventNotifierEmitter {
   /** 読み込みの完了フラグ */
   get isLoaded(): boolean;
@@ -282,5 +283,40 @@ export class ExtraObjectWrapper
       // 実行する必要がないのなら、子クラスでoverrideする
       this.emitOnLoad();
     }
+  }
+
+  onEffect(receiver: () => void) {
+    this.observerEffect(receiver);
+    return this;
+  }
+
+  onHide(receiver: () => void) {
+    this.observerHide(receiver);
+    return this;
+  }
+
+  onLoad(receiver: () => void) {
+    this.observerLoad(receiver);
+    return this;
+  }
+
+  onTick(receiver: () => void) {
+    this.observerTick(receiver);
+    return this;
+  }
+
+  onUpdateState(receiver: (parameter: string | number) => void) {
+    this.observerUpdateState(receiver);
+    return this;
+  }
+
+  onVisible(receiver: () => void) {
+    this.observerVisible(receiver);
+    return this;
+  }
+
+  effectDependsOn(notifier: UpdateNotifier) {
+    this.observerEffectDependsOn(notifier);
+    return this;
   }
 }

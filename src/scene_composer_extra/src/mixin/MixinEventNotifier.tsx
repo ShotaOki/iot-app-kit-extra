@@ -14,21 +14,41 @@ const EventName = {
 type UpdateStateParameter = string | number;
 
 // 受信関数
-export interface MixinEventNotifierInterface {
+export interface MixinEventNotifierObserver {
   /** 読み込みが完了したことを通知する関数 */
-  onLoad(receiver: () => void): this;
+  observerLoad(receiver: () => void): void;
   /** 状態が変更されたことを通知する関数 */
-  onUpdateState(receiver: (parameter: UpdateStateParameter) => void): this;
+  observerUpdateState(
+    receiver: (parameter: UpdateStateParameter) => void
+  ): void;
   /** 画面の状態が更新されたことを通知する関数 */
-  onTick(receiver: () => void): this;
+  observerTick(receiver: () => void): void;
   /** effectDependsOnで設定した更新通知クラスが更新された */
-  onEffect(receiver: () => void): this;
+  observerEffect(receiver: () => void): void;
   /** useSceneStateで取得する更新通知クラス */
-  effectDependsOn(notifier: UpdateNotifier): this;
+  observerEffectDependsOn(notifier: UpdateNotifier): void;
   /** 表示状態が表示に変わった時に通知する関数 */
-  onVisible(receiver: () => void): this;
+  observerVisible(receiver: () => void): void;
   /** 表示状態が非表示に変わった時に通知する関数 */
-  onHide(receiver: () => void): this;
+  observerHide(receiver: () => void): void;
+}
+
+// 受信関数
+export interface EventNotifierInterface<T> {
+  /** 読み込みが完了したことを通知する関数 */
+  onLoad(receiver: () => void): T;
+  /** 状態が変更されたことを通知する関数 */
+  onUpdateState(receiver: (parameter: UpdateStateParameter) => void): T;
+  /** 画面の状態が更新されたことを通知する関数 */
+  onTick(receiver: () => void): T;
+  /** effectDependsOnで設定した更新通知クラスが更新された */
+  onEffect(receiver: () => void): T;
+  /** useSceneStateで取得する更新通知クラス */
+  effectDependsOn(notifier: UpdateNotifier): T;
+  /** 表示状態が表示に変わった時に通知する関数 */
+  onVisible(receiver: () => void): T;
+  /** 表示状態が非表示に変わった時に通知する関数 */
+  onHide(receiver: () => void): T;
 }
 
 // Mixinの継承判定
@@ -56,7 +76,7 @@ export interface MixinEventNotifierEmitter {
 export function MixinEventNotifier<TBase extends Constructor>(Base: TBase) {
   return class EventNotifier
     extends Base
-    implements MixinEventNotifierInterface, MixinEventNotifierEmitter
+    implements MixinEventNotifierObserver, MixinEventNotifierEmitter
   {
     #_eventEmitter: EventEmitter = new EventEmitter();
     #_eventUUID: string = "";
@@ -85,39 +105,34 @@ export function MixinEventNotifier<TBase extends Constructor>(Base: TBase) {
       this.#_eventEmitter.emit(EventName.HIDE);
     }
 
-    onUpdateState(receiver: (parameter: UpdateStateParameter) => void): this {
+    observerUpdateState(
+      receiver: (parameter: UpdateStateParameter) => void
+    ): void {
       this.#_eventEmitter.on(EventName.UPDATE_STATE, receiver);
-      return this;
     }
 
-    onTick(receiver: () => void): this {
+    observerTick(receiver: () => void): void {
       this.#_eventEmitter.on(EventName.TICK, receiver);
-      return this;
     }
 
-    onLoad(receiver: () => void): this {
+    observerLoad(receiver: () => void): void {
       this.#_eventEmitter.on(EventName.LOAD, receiver);
-      return this;
     }
 
-    onEffect(receiver: () => void): this {
+    observerEffect(receiver: () => void): void {
       this.#_eventEmitter.on(this.#_eventUUID, receiver);
-      return this;
     }
 
-    onVisible(receiver: () => void): this {
+    observerVisible(receiver: () => void): void {
       this.#_eventEmitter.on(EventName.VISIBLE, receiver);
-      return this;
     }
 
-    onHide(receiver: () => void): this {
+    observerHide(receiver: () => void): void {
       this.#_eventEmitter.on(EventName.HIDE, receiver);
-      return this;
     }
 
-    effectDependsOn(notifier: UpdateNotifier): this {
+    observerEffectDependsOn(notifier: UpdateNotifier): void {
       notifier.bind(() => this.#_eventEmitter.emit(this.#_eventUUID));
-      return this;
     }
   };
 }
