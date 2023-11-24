@@ -2,11 +2,19 @@ import {
   ExtraObjectWrapper,
   type ModelParameterBase,
 } from "../ExtraObjectWrapper";
-import { Color } from "three/src/Three";
+import { Color, TextureLoader } from "three/src/Three";
 import ThreeMeshUI from "three-mesh-ui";
 import { AnimationParameter } from "../../types/DataType";
 import { FontData } from "../../types/MeshUiFont";
 import { MixinBillboard } from "../../mixin/MixinBillboard";
+import {
+  CreateEventValueParameter,
+  EventParameter,
+} from "../../mixin/MixinEventNotifier";
+import {
+  MeshUiButtonFileContents,
+  MeshUiButtonSetterEvent,
+} from "./MeshUiButtonWrapper";
 
 export interface MeshUiButtonColor {
   backgroundColor: Color;
@@ -31,7 +39,6 @@ MixinBillboard( // 必ずこちら側にオブジェクトを向ける
 
 export class MeshUiTextWrapper extends MixinExtraObject {
   private _content?: any;
-  private _onAnimatingEvent?: (text: MeshUiTextWrapper) => void;
 
   /**
    * 初期化する
@@ -80,10 +87,35 @@ export class MeshUiTextWrapper extends MixinExtraObject {
     return this;
   }
 
+  /** onイベントの通知先に連携するデータを定義する */
+  createParameter(
+    value: CreateEventValueParameter,
+    event?: EventParameter
+  ): EventParameter & MeshUiButtonSetterEvent {
+    const that = this;
+    return {
+      /** 共通のイベントデータ */
+      ...super.createParameter(value, event),
+      /** ボタンにデータコンテンツを設定する */
+      set: (jsonData: any) => that.set(jsonData),
+      /** ボタンにデータコンテンツを設定する */
+      setContent: (content: string | MeshUiButtonFileContents) =>
+        that.setContent(content),
+    };
+  }
+
+  /** イベント: レンダリング状態を更新した */
+  onTick(
+    receiver: (parameter: EventParameter & MeshUiButtonSetterEvent) => void
+  ): this {
+    this.observerTick(receiver);
+    return this;
+  }
+
   /**
    * コンテンツを更新する
    */
-  setContent(content: string) {
+  setContent(content: string | MeshUiButtonFileContents) {
     // 設定先のコンテンツがなければ処理を終了する
     if (this._content === undefined) return;
     // データを更新する
@@ -91,6 +123,14 @@ export class MeshUiTextWrapper extends MixinExtraObject {
       // テキストコンテンツを更新する
       this._content.set({
         content,
+      });
+    } else {
+      // テクスチャ画像を更新する
+      const loader = new TextureLoader();
+      loader.loadAsync(content.filePath).then((texture) => {
+        this._content.set({
+          backgroundTexture: texture,
+        });
       });
     }
   }
@@ -105,16 +145,18 @@ export class MeshUiTextWrapper extends MixinExtraObject {
     this._content.set(jsonData);
   }
 
-  /** イベント: アニメーションループが実行された */
-  onAnimating(animatingEvent: (text: MeshUiTextWrapper) => void) {
-    this._onAnimatingEvent = animatingEvent;
-    return this;
-  }
+  /**
+   * --------------------------------
+   * 前方互換性のために残す関数
+   * --------------------------------
+   */
 
-  /** アニメーションループ */
-  executeAnimationLoop(parameter: AnimationParameter) {
-    if (this._onAnimatingEvent && this._content !== undefined) {
-      this._onAnimatingEvent(this);
-    }
+  /**
+   * @deprecated onTickを使用
+   * イベント: アニメーションループが実行された */
+  onAnimating(
+    animatingEvent: (text: EventParameter & MeshUiButtonSetterEvent) => void
+  ) {
+    return this.onTick(animatingEvent);
   }
 }

@@ -8,6 +8,10 @@ import { getState } from "../../utility/SceneUtility";
 import { Raycaster, Color, Camera, TextureLoader } from "three/src/Three";
 import { FontData } from "../../types/MeshUiFont";
 import { MixinBillboard } from "../../mixin/MixinBillboard";
+import {
+  CreateEventValueParameter,
+  EventParameter,
+} from "../../mixin/MixinEventNotifier";
 
 export interface MeshUiButtonColor {
   backgroundColor: Color;
@@ -16,6 +20,11 @@ export interface MeshUiButtonColor {
 
 export interface MeshUiButtonFileContents {
   filePath: string;
+}
+
+export interface MeshUiButtonSetterEvent {
+  set: (jsonData: any) => void;
+  setContent: (content: string | MeshUiButtonFileContents) => void;
 }
 
 // クラスに取り込むミックスインを指定する
@@ -42,10 +51,7 @@ export interface MeshUiButtonParameter extends ModelParameterBase {
 export class MeshUiButtonWrapper extends MixinExtraObject {
   private _camera: Camera | null = null;
   private _objsToTest: Array<ThreeMeshUI.Block> = [];
-
   private _content?: any;
-  private _onClickEvent?: () => void;
-  private _onAnimatingEvent?: (text: MeshUiButtonWrapper) => void;
 
   /**
    * 初期化する
@@ -109,9 +115,7 @@ export class MeshUiButtonWrapper extends MixinExtraObject {
         ...parameter.stateStyle["selected"],
       },
       onSet: () => {
-        if (that._onClickEvent) {
-          that._onClickEvent();
-        }
+        that.emitClick();
       },
     });
     button.setupState({
@@ -147,15 +151,34 @@ export class MeshUiButtonWrapper extends MixinExtraObject {
     return this;
   }
 
+  /** onイベントの通知先に連携するデータを定義する */
+  createParameter(
+    value: CreateEventValueParameter,
+    event?: EventParameter
+  ): EventParameter & MeshUiButtonSetterEvent {
+    const that = this;
+    return {
+      /** 共通のイベントデータ */
+      ...super.createParameter(value, event),
+      /** ボタンにデータコンテンツを設定する */
+      set: (jsonData: any) => that.set(jsonData),
+      /** ボタンにデータコンテンツを設定する */
+      setContent: (content: string | MeshUiButtonFileContents) =>
+        that.setContent(content),
+    };
+  }
+
   /** イベント: クリックを受けた */
-  onClickEvent(clickEvent: () => void) {
-    this._onClickEvent = clickEvent;
+  onClick(clickEvent: (parameter: EventParameter) => void) {
+    this.observerClick(clickEvent);
     return this;
   }
 
-  /** イベント: アニメーションループが実行された */
-  onAnimating(animatingEvent: (text: MeshUiButtonWrapper) => void) {
-    this._onAnimatingEvent = animatingEvent;
+  /** イベント: レンダリング状態を更新した */
+  onTick(
+    receiver: (parameter: EventParameter & MeshUiButtonSetterEvent) => void
+  ): this {
+    this.observerTick(receiver);
     return this;
   }
 
@@ -210,9 +233,6 @@ export class MeshUiButtonWrapper extends MixinExtraObject {
       parameter.raycaster.setFromCamera(parameter.mouse, this._camera);
       this.raycast(parameter.raycaster, parameter.isSelect);
     }
-    if (this._onAnimatingEvent && this._content !== undefined) {
-      this._onAnimatingEvent(this);
-    }
   }
 
   private raycast(raycaster: Raycaster, isSelected: boolean) {
@@ -228,5 +248,27 @@ export class MeshUiButtonWrapper extends MixinExtraObject {
         target.setState("idle");
       }
     });
+  }
+
+  /**
+   * --------------------------------
+   * 前方互換性のために残す関数
+   * --------------------------------
+   */
+
+  /**
+   * @deprecated onClickを使用
+   * イベント: クリックを受けた */
+  onClickEvent(clickEvent: (parameter: EventParameter) => void) {
+    return this.onClick(clickEvent);
+  }
+
+  /**
+   * @deprecated onTickを使用
+   * イベント: アニメーションループが実行された */
+  onAnimating(
+    animatingEvent: (text: EventParameter & MeshUiButtonSetterEvent) => void
+  ) {
+    return this.onTick(animatingEvent);
   }
 }

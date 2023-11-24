@@ -15,21 +15,25 @@ export class ReplaceTagBase {
   _tag?: Object3D<Event>;
   // オプション: 置き換え後のオブジェクトを配置するグループ
   _parentGroup?: Object3D;
+  // タグの表示名
+  _nodeName: string;
 
   /**
    * @param ref タグオブジェクトのRef ID
    * @param anchor タグオブジェクトのアンカー情報(位置、色、アイコン情報などが入っている)
    */
-  constructor(
-    rootScene: Scene,
-    anchor: IAnchorComponent,
-    tag?: Object3D<Event>,
-    parentGroup?: Object3D
-  ) {
-    this._rootScene = rootScene;
-    this._anchor = anchor;
-    this._tag = tag;
-    this._parentGroup = parentGroup;
+  constructor(parameter: {
+    rootScene: Scene;
+    anchor: IAnchorComponent;
+    tag?: Object3D<Event>;
+    parentGroup?: Object3D;
+    nodeName: string;
+  }) {
+    this._rootScene = parameter.rootScene;
+    this._anchor = parameter.anchor;
+    this._tag = parameter.tag;
+    this._parentGroup = parameter.parentGroup;
+    this._nodeName = parameter.nodeName;
   }
 
   /* タグからの入れ替え先に受け渡すパラメータを設定する */
@@ -41,6 +45,7 @@ export class ReplaceTagBase {
       scale: tag.scale,
       anchor: this._anchor,
       parentObject: this._parentGroup,
+      nodeName: this._nodeName,
     };
   }
 }

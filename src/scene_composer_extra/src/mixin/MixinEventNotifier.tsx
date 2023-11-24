@@ -2,53 +2,100 @@ import { generateUUID } from "three/src/math/MathUtils";
 import { UpdateNotifier } from "../types/SceneState";
 import { Constructor } from "./MixinBase";
 import { EventEmitter } from "events";
+import { Primitive } from "@iot-app-kit/core";
+import { Matrix4 } from "three";
 
 const EventName = {
-  LOAD: "load",
-  UPDATE_STATE: "updateState",
-  TICK: "tick",
-  VISIBLE: "visible",
-  HIDE: "hide",
+  // 基底クラスで実装
+  LOAD: "load", // 読み込みを完了した: 標準イベント
+  TICK: "tick", // レンダリングされた: 標準イベント
+  VISIBLE: "visible", // 表示状態を更新した: 標準イベント
+  HIDE: "hide", // 表示状態を更新した: 標準イベント
+  UPDATE_STATE: "updateState", // 状態を更新した: 標準イベント
+  UPDATE_VALUE: "updateValue", // 値を更新した: 標準イベント
+  UPDATE_CAMERA: "updateCamera", // カメラの状態を更新した: 標準イベント
+  // 操作可能なクラスで実装
+  CLICK: "click", // クリック操作を受けた: 標準イベント
 };
 
-type UpdateStateParameter = string | number;
+export interface EventParameterUpdateState {
+  state: string | number;
+}
+
+export interface EventParameterUpdateValue {
+  values: Record<string, Primitive>;
+}
+
+export interface EventParameterUpdateCameraAngle {
+  cameraState: string;
+  matrix: Matrix4;
+}
+
+interface EventParameterBase {
+  self: any;
+  tagName: string;
+  breadcrumb: string;
+  rootScene: any;
+}
+
+export type CreateEventValueParameter =
+  | EventParameterUpdateState
+  | EventParameterUpdateValue
+  | EventParameterUpdateCameraAngle
+  | undefined;
+
+export interface EventParameter
+  extends EventParameterBase,
+    Partial<EventParameterUpdateState>,
+    Partial<EventParameterUpdateValue>,
+    Partial<EventParameterUpdateCameraAngle> {}
 
 // 受信関数
 export interface MixinEventNotifierObserver {
+  createParameter(value: any): any;
   /** 読み込みが完了したことを通知する関数 */
-  observerLoad(receiver: () => void): void;
+  observerLoad(receiver: (parameter: any) => void): void;
   /** 状態が変更されたことを通知する関数 */
-  observerUpdateState(
-    receiver: (parameter: UpdateStateParameter) => void
-  ): void;
+  observerUpdateState(receiver: (parameter: any) => void): void;
+  /** 値が変更されたことを通知する関数 */
+  observerUpdateValue(receiver: (parameter: any) => void): void;
+  /** カメラの表示範囲が変更されたことを通知する関数 */
+  observerUpdateCameraAngle(receiver: (parameter: any) => void): void;
   /** 画面の状態が更新されたことを通知する関数 */
-  observerTick(receiver: () => void): void;
+  observerTick(receiver: (parameter: any) => void): void;
   /** effectDependsOnで設定した更新通知クラスが更新された */
-  observerEffect(receiver: () => void): void;
+  observerEffect(receiver: (parameter: any) => void): void;
   /** useSceneStateで取得する更新通知クラス */
   observerEffectDependsOn(notifier: UpdateNotifier): void;
   /** 表示状態が表示に変わった時に通知する関数 */
-  observerVisible(receiver: () => void): void;
+  observerVisible(receiver: (parameter: any) => void): void;
   /** 表示状態が非表示に変わった時に通知する関数 */
-  observerHide(receiver: () => void): void;
+  observerHide(receiver: (parameter: any) => void): void;
+  /** クリック操作を受けたときに通知する関数 */
+  observerClick(receiver: (parameter: any) => void): void;
 }
 
 // 受信関数
-export interface EventNotifierInterface<T> {
+export interface EventNotifierInterface<S, T> {
+  createParameter(value: any): S;
   /** 読み込みが完了したことを通知する関数 */
-  onLoad(receiver: () => void): T;
+  onLoad(receiver: (parameter: S) => void): T;
   /** 状態が変更されたことを通知する関数 */
-  onUpdateState(receiver: (parameter: UpdateStateParameter) => void): T;
+  onUpdateState(receiver: (parameter: S) => void): T;
+  /** 値が変更されたことを通知する関数 */
+  onUpdateValue(receiver: (parameter: S) => void): T;
+  /** カメラの表示範囲が変更されたことを通知する関数 */
+  onUpdateCameraAngle(receiver: (parameter: S) => void): T;
   /** 画面の状態が更新されたことを通知する関数 */
-  onTick(receiver: () => void): T;
+  onTick(receiver: (parameter: S) => void): T;
   /** effectDependsOnで設定した更新通知クラスが更新された */
-  onEffect(receiver: () => void): T;
+  onEffect(receiver: (parameter: S) => void): T;
   /** useSceneStateで取得する更新通知クラス */
   effectDependsOn(notifier: UpdateNotifier): T;
   /** 表示状態が表示に変わった時に通知する関数 */
-  onVisible(receiver: () => void): T;
+  onVisible(receiver: (parameter: S) => void): T;
   /** 表示状態が非表示に変わった時に通知する関数 */
-  onHide(receiver: () => void): T;
+  onHide(receiver: (parameter: S) => void): T;
 }
 
 // Mixinの継承判定
@@ -60,17 +107,23 @@ export function isMixinEventNotifierEmitter(
     "emitUpdateState" in object &&
     "emitTick" in object &&
     "emitVisible" in object &&
-    "emitHide" in object
+    "emitHide" in object &&
+    "emitUpdateValue" in object &&
+    "emitUpdateCamera" in object &&
+    "emitClick" in object
   );
 }
 
 // 発行関数
 export interface MixinEventNotifierEmitter {
   emitOnLoad(): void;
-  emitUpdateState(parameter: UpdateStateParameter): void;
+  emitUpdateState(parameter: EventParameterUpdateState): void;
+  emitUpdateValue(parameter: EventParameterUpdateValue): void;
+  emitUpdateCamera(parameter: EventParameterUpdateCameraAngle): void;
   emitTick(): void;
   emitVisible(): void;
   emitHide(): void;
+  emitClick(): void;
 }
 
 export function MixinEventNotifier<TBase extends Constructor>(Base: TBase) {
@@ -85,54 +138,99 @@ export function MixinEventNotifier<TBase extends Constructor>(Base: TBase) {
       this.#_eventUUID = generateUUID();
     }
 
-    emitUpdateState(parameter: UpdateStateParameter): void {
-      this.#_eventEmitter.emit(EventName.UPDATE_STATE, parameter);
+    createParameter(
+      value: CreateEventValueParameter = undefined,
+      event?: EventParameter
+    ): EventParameter {
+      const parameter: EventParameter = event ?? {
+        self: this,
+        tagName: "",
+        breadcrumb: "",
+        rootScene: null,
+        ...(value ?? {}),
+      };
+      return parameter;
+    }
+
+    emitUpdateState(parameter: EventParameterUpdateState): void {
+      this.#_eventEmitter.emit(
+        EventName.UPDATE_STATE,
+        this.createParameter(parameter)
+      );
     }
 
     emitTick(): void {
-      this.#_eventEmitter.emit(EventName.TICK);
+      this.#_eventEmitter.emit(EventName.TICK, this.createParameter());
     }
 
     emitOnLoad() {
-      this.#_eventEmitter.emit(EventName.LOAD);
+      this.#_eventEmitter.emit(EventName.LOAD, this.createParameter());
     }
 
     emitVisible(): void {
-      this.#_eventEmitter.emit(EventName.VISIBLE);
+      this.#_eventEmitter.emit(EventName.VISIBLE, this.createParameter());
     }
 
     emitHide(): void {
-      this.#_eventEmitter.emit(EventName.HIDE);
+      this.#_eventEmitter.emit(EventName.HIDE, this.createParameter());
     }
 
-    observerUpdateState(
-      receiver: (parameter: UpdateStateParameter) => void
-    ): void {
+    emitUpdateValue(parameter: EventParameterUpdateValue): void {
+      this.#_eventEmitter.emit(
+        EventName.UPDATE_VALUE,
+        this.createParameter(parameter)
+      );
+    }
+
+    emitUpdateCamera(parameter: EventParameterUpdateCameraAngle): void {
+      this.#_eventEmitter.emit(
+        EventName.UPDATE_CAMERA,
+        this.createParameter(parameter)
+      );
+    }
+
+    emitClick(): void {
+      this.#_eventEmitter.emit(EventName.CLICK, this.createParameter());
+    }
+
+    observerUpdateState(receiver: (parameter: any) => void): void {
       this.#_eventEmitter.on(EventName.UPDATE_STATE, receiver);
     }
 
-    observerTick(receiver: () => void): void {
+    observerTick(receiver: (parameter: any) => void): void {
       this.#_eventEmitter.on(EventName.TICK, receiver);
     }
 
-    observerLoad(receiver: () => void): void {
+    observerLoad(receiver: (parameter: any) => void): void {
       this.#_eventEmitter.on(EventName.LOAD, receiver);
     }
 
-    observerEffect(receiver: () => void): void {
+    observerEffect(receiver: (parameter: any) => void): void {
       this.#_eventEmitter.on(this.#_eventUUID, receiver);
     }
 
-    observerVisible(receiver: () => void): void {
+    observerVisible(receiver: (parameter: any) => void): void {
       this.#_eventEmitter.on(EventName.VISIBLE, receiver);
     }
 
-    observerHide(receiver: () => void): void {
+    observerHide(receiver: (parameter: any) => void): void {
       this.#_eventEmitter.on(EventName.HIDE, receiver);
     }
 
     observerEffectDependsOn(notifier: UpdateNotifier): void {
       notifier.bind(() => this.#_eventEmitter.emit(this.#_eventUUID));
+    }
+
+    observerUpdateValue(receiver: (parameter: any) => void): void {
+      this.#_eventEmitter.on(EventName.UPDATE_VALUE, receiver);
+    }
+
+    observerUpdateCameraAngle(receiver: (parameter: any) => void): void {
+      this.#_eventEmitter.on(EventName.UPDATE_CAMERA, receiver);
+    }
+
+    observerClick(receiver: (parameter: any) => void): void {
+      this.#_eventEmitter.on(EventName.CLICK, receiver);
     }
   };
 }

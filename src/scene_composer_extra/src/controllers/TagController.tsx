@@ -60,7 +60,12 @@ function executeIfNodeIsTag(
       if (component.type === KnownComponentType.Tag) {
         // タグの置換情報を渡す
         return callback(
-          context.replaceFromTag(rootScene, ref, component as IAnchorComponent)
+          context.replaceFromTag(
+            rootScene,
+            ref,
+            component as IAnchorComponent,
+            node.name
+          )
         );
       }
     }
@@ -87,9 +92,19 @@ export class ReplaceContext {
   }
 
   /** タグから別のオブジェクトに変換する */
-  replaceFromTag(rootScene: Scene, ref: string, anchor: IAnchorComponent) {
+  replaceFromTag(
+    rootScene: Scene,
+    ref: string,
+    anchor: IAnchorComponent,
+    nodeName: string
+  ) {
     const tag = this._getObject3DBySceneNodeRef(ref);
-    return new ReplaceTag(rootScene, anchor, tag);
+    return new ReplaceTag({
+      rootScene: rootScene,
+      anchor: anchor,
+      tag: tag,
+      nodeName: nodeName,
+    });
   }
 }
 

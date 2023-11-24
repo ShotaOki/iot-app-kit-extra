@@ -98,10 +98,16 @@ export class SceneController extends MixinMouseInput(Object) {
 
         // マウスイベントを通知する
         Object.keys(that._objects).forEach((k) => {
+          // アニメーションの実行ループを実行する
           that._objects[k].callAnimationLoop({
             ...that.currentEvent,
             cameraState: cameraState,
             cameraAngle: cameraAngle,
+          });
+          // カメラの移動を通知する
+          that._objects[k].emitUpdateCameraIfNeeded({
+            cameraState: cameraState,
+            matrix: camera.matrix,
           });
         });
         that.next();
@@ -203,6 +209,10 @@ export class SceneController extends MixinMouseInput(Object) {
           wrapper.anchor.valueDataBinding,
           dataBindingTemplate
         );
+        // クラウドの最新値の更新を通知する
+        wrapper.emitUpdateValue({
+          values: values,
+        });
         // TwinMakerの色変更ルールを参照する
         const ruleId = wrapper.anchor.ruleBasedMapId;
         const ruleTarget = ruleEvaluator(

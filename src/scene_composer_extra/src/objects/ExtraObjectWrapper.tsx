@@ -8,8 +8,15 @@ import {
   MixinEventNotifier,
   MixinEventNotifierEmitter,
   EventNotifierInterface,
+  EventParameter,
+  CreateEventValueParameter,
+  EventParameterUpdateCameraAngle,
 } from "../mixin/MixinEventNotifier";
 import { UpdateNotifier } from "../types/SceneState";
+import {
+  MixinEventConditionHandler,
+  MixinEventConditionHandlerInterface,
+} from "../mixin/MixinEventConditoinHandler";
 
 /** 位置の絶対/相対値指定 */
 export interface ModelParameterVector3 {
@@ -55,14 +62,17 @@ export interface ExtraObjectWrapperParameter {
   anchor: IAnchorComponent;
   // オプション: 親オブジェクト（未設定であればルートシーンを親とする）
   parentObject?: Object3D;
+  // タグの表示名
+  nodeName: string;
 }
 
 /**
  * 外部から呼び出し可能なExtraObjectの情報
  */
 export interface ExtraObjectInterface
-  extends EventNotifierInterface<any>,
-    MixinEventNotifierEmitter {
+  extends EventNotifierInterface<EventParameter, any>,
+    MixinEventNotifierEmitter,
+    MixinEventConditionHandlerInterface {
   /** 読み込みの完了フラグ */
   get isLoaded(): boolean;
   /** Object3Dのオブジェクトを返却する */
@@ -77,9 +87,17 @@ export interface ExtraObjectInterface
   awake(): void;
 }
 
+// クラスに取り込むミックスインを指定する
+// prettier-ignore
+const MixinExtraObject = /** */
+MixinEventConditionHandler( // 条件付きイベント通知のハンドラ
+MixinEventNotifier(// イベント通知のハンドラ
+  Object
+));
+
 /** ライブラリ内部で利用できるExtraObjectの情報 */
 export class ExtraObjectWrapper
-  extends MixinEventNotifier(Object)
+  extends MixinExtraObject
   implements ExtraObjectInterface
 {
   // 表示位置
@@ -100,6 +118,10 @@ export class ExtraObjectWrapper
   protected _object: Object3D | undefined;
   // オプション: 親オブジェクト（未設定であればルートシーンを親とする）
   protected _parentObject: Object3D | undefined;
+  // ノードの表示名
+  protected _nodeName: string;
+  // カメラの状態
+  protected _cameraState: string;
 
   constructor(parameter: ExtraObjectWrapperParameter) {
     super();
@@ -112,6 +134,8 @@ export class ExtraObjectWrapper
     this._flagLoaded = false;
     this._object = undefined;
     this._parentObject = parameter.parentObject;
+    this._nodeName = parameter.nodeName;
+    this._cameraState = "";
     this.eventNotifierInitialize();
   }
 
@@ -265,7 +289,9 @@ export class ExtraObjectWrapper
     // 状態を更新する
     this._state = newState;
     // 状態の変更を通知する
-    this.emitUpdateState(newState);
+    this.emitUpdateState({
+      state: newState,
+    });
     // 子クラスに状態の変更を伝達する
     this.receivedChangeState(newState);
   }
@@ -285,38 +311,73 @@ export class ExtraObjectWrapper
     }
   }
 
-  onEffect(receiver: () => void) {
+  /** on関数に受け渡すパラメータを定義する */
+  createParameter(
+    value: CreateEventValueParameter,
+    event?: EventParameter
+  ): EventParameter {
+    return super.createParameter(
+      value,
+      event ?? {
+        self: this,
+        tagName: this._nodeName,
+        breadcrumb: this._nodeName,
+        rootScene: this._rootScene,
+      }
+    );
+  }
+
+  /** effectDependsOnで設定した依存先が更新された */
+  onEffect(receiver: (parameter: EventParameter) => void) {
     this.observerEffect(receiver);
     return this;
   }
 
-  onHide(receiver: () => void) {
+  /** 画面部品が非表示になった */
+  onHide(receiver: (parameter: EventParameter) => void) {
     this.observerHide(receiver);
     return this;
   }
 
-  onLoad(receiver: () => void) {
+  /** 初期化された、読み込みが完了した */
+  onLoad(receiver: (parameter: EventParameter) => void) {
     this.observerLoad(receiver);
     return this;
   }
 
-  onTick(receiver: () => void) {
+  /** 画面がレンダリングされた（毎フレーム実行される） */
+  onTick(receiver: (parameter: EventParameter) => void) {
     this.observerTick(receiver);
     return this;
   }
 
-  onUpdateState(receiver: (parameter: string | number) => void) {
+  /** TwinMakerのデータ状態が更新された */
+  onUpdateState(receiver: (parameter: EventParameter) => void) {
     this.observerUpdateState(receiver);
     return this;
   }
 
-  onVisible(receiver: () => void) {
+  /** 画面部品が表示中になった */
+  onVisible(receiver: (parameter: EventParameter) => void) {
     this.observerVisible(receiver);
     return this;
   }
 
+  /** 依存関係を設定する */
   effectDependsOn(notifier: UpdateNotifier) {
     this.observerEffectDependsOn(notifier);
+    return this;
+  }
+
+  /** 値が更新された */
+  onUpdateValue(receiver: (parameter: EventParameter) => void) {
+    this.observerUpdateValue(receiver);
+    return this;
+  }
+
+  /** カメラアングルが更新された */
+  onUpdateCameraAngle(receiver: (parameter: EventParameter) => void) {
+    this.observerUpdateCameraAngle(receiver);
     return this;
   }
 }
