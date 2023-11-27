@@ -31,19 +31,28 @@ export function getState(rootScene: Scene): RootState {
 }
 
 /**
+ * シーンの初期化パラメータ
+ */
+export interface SceneParameterType {
+  // コンポーザID: 未指定の場合は乱数で発行する
+  sceneComposerId?: string;
+}
+
+/**
  * ユーティリティ: タグの上書きをする
  * useSceneControllerのoverrideTagsだけを実行して、SceneControllerを返す
  *
  * @param factory OverrideTagsParameterを作成する関数
  */
 export function useOverrideTags(
-  parameter: OverrideTagsParameter
+  parameter: OverrideTagsParameter,
+  sceneParameter?: SceneParameterType
 ): SceneController {
   return useSceneController((composerId, context) => {
     return new SceneController(composerId, context, {
       overrideTags: parameter,
     });
-  });
+  }, sceneParameter ?? {});
 }
 
 /** シーンコントローラーを作成する関数 */
@@ -58,10 +67,19 @@ type SceneControllerFactory = (
  * @param factory SceneControllerを作成する関数
  */
 export function useSceneController(
-  factory: SceneControllerFactory
+  factory: SceneControllerFactory,
+  parameter: SceneParameterType
 ): SceneController {
+  const memoDependencies = [];
+  if (parameter?.sceneComposerId) {
+    // パラメータにSceneComposerIdがあるのなら、更新を監視する
+    memoDependencies.push(parameter.sceneComposerId);
+  }
   // 任意のコンポーザーID: SceneComposerに対して固定値を指定する
-  const composerId = useMemo(() => generateUUID(), []);
+  const composerId = useMemo(
+    () => parameter?.sceneComposerId ?? generateUUID(),
+    memoDependencies
+  );
 
   /** 状態の管理フラグ */
   let [initializedFlag, setInitializedFlag] = useState(
