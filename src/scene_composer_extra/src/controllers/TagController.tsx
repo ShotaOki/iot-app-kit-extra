@@ -104,6 +104,7 @@ export class ReplaceContext {
       anchor: anchor,
       tag: tag,
       nodeName: nodeName,
+      breadcrumb: "/" + nodeName,
     });
   }
 }

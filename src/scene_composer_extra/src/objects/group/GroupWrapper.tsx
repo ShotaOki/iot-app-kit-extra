@@ -72,6 +72,7 @@ export class GroupWrapper extends MixinExtraObjectWrapper {
           ) as any,
           parentGroup: groupParent,
           nodeName: tag,
+          breadcrumb: this._breadcrumb + "/" + tag,
         })
       );
       if (result) {

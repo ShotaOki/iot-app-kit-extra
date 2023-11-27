@@ -17,6 +17,8 @@ export class ReplaceTagBase {
   _parentGroup?: Object3D;
   // タグの表示名
   _nodeName: string;
+  // 表示名の階層情報
+  _breadcrumb: string;
 
   /**
    * @param ref タグオブジェクトのRef ID
@@ -28,12 +30,14 @@ export class ReplaceTagBase {
     tag?: Object3D<Event>;
     parentGroup?: Object3D;
     nodeName: string;
+    breadcrumb: string;
   }) {
     this._rootScene = parameter.rootScene;
     this._anchor = parameter.anchor;
     this._tag = parameter.tag;
     this._parentGroup = parameter.parentGroup;
     this._nodeName = parameter.nodeName;
+    this._breadcrumb = parameter.breadcrumb;
   }
 
   /* タグからの入れ替え先に受け渡すパラメータを設定する */
@@ -46,6 +50,7 @@ export class ReplaceTagBase {
       anchor: this._anchor,
       parentObject: this._parentGroup,
       nodeName: this._nodeName,
+      breadcrumb: this._breadcrumb,
     };
   }
 }

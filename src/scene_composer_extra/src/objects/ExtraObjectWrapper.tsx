@@ -64,6 +64,8 @@ export interface ExtraObjectWrapperParameter {
   parentObject?: Object3D;
   // タグの表示名
   nodeName: string;
+  // パンくずの階層情報
+  breadcrumb: string;
 }
 
 /**
@@ -122,6 +124,8 @@ export class ExtraObjectWrapper
   protected _nodeName: string;
   // カメラの状態
   protected _cameraState: string;
+  // パンくずの階層情報
+  protected _breadcrumb: string;
 
   constructor(parameter: ExtraObjectWrapperParameter) {
     super();
@@ -136,6 +140,7 @@ export class ExtraObjectWrapper
     this._parentObject = parameter.parentObject;
     this._nodeName = parameter.nodeName;
     this._cameraState = "";
+    this._breadcrumb = parameter.breadcrumb;
     this.eventNotifierInitialize();
   }
 
@@ -321,7 +326,7 @@ export class ExtraObjectWrapper
       event ?? {
         self: this,
         tagName: this._nodeName,
-        breadcrumb: this._nodeName,
+        breadcrumb: this._breadcrumb,
         rootScene: this._rootScene,
       }
     );
