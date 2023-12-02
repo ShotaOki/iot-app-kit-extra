@@ -10,6 +10,14 @@ on:
         description: "update @iak-extra/scene-composer-extra version"
         required: true
         type: boolean
+      iot_appkit_version:
+        description: "@iot-appkit version"
+        required: true
+        type: string
+      update_iot_appkit_version:
+        description: "update @iot-appkit version"
+        required: true
+        type: boolean
 jobs:
   update_scene_composer_extra:
     permissions:
@@ -23,10 +31,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "18.17.1"
-      - name: Zip Vite Project
+      - name: Rewrite Version
         working-directory: utility
         run: |
-          node dependency-control.js replace version-override.json "${TARGET_LIBRARY}=${LIBRARY_VERSION}"
+          node dependency-control.js replace version-override.json "${TARGET_LIBRARY}=^${LIBRARY_VERSION}"
         env:
           LIBRARY_VERSION: ${{ inputs.scene_composer_extra_version }}
           TARGET_LIBRARY: "@iak-extra/scene-composer-extra"
@@ -43,10 +51,57 @@ jobs:
       - name: commit project
         run: |
           git remote set-url origin https://github-actions:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
-          git config --global user.name PackageCurrentTemplate
-          git config --global user.email PackageCurrentTemplate@system.com
+          git config --global user.name update_scene_composer_extra
+          git config --global user.email update_scene_composer_extra@system.com
           git add .
-          git commit -m "commit from github actions package_current_template"
+          git commit -m "@iak-extra/scene-composer-extra version update : ${LIBRARY_VERSION}"
           git push origin
         env:
+          LIBRARY_VERSION: ${{ inputs.scene_composer_extra_version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update_scene_composer:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    if: ${{ inputs.update_iot_appkit_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18.17.1"
+      - name: Rewrite Version
+        working-directory: utility
+        run: |
+          node dependency-control.js replace version-override.json "@iot-app-kit/components=^${LIBRARY_VERSION}"
+          node dependency-control.js replace version-override.json "@iot-app-kit/react-components=^${LIBRARY_VERSION}"
+          node dependency-control.js replace version-override.json "@iot-app-kit/scene-composer=^${LIBRARY_VERSION}"
+          node dependency-control.js replace version-override.json "@iot-app-kit/source-iottwinmaker=^${LIBRARY_VERSION}"
+        env:
+          LIBRARY_VERSION: ${{ inputs.iot_appkit_version }}
+      - name: Update Project Dependency
+        run: |
+          node utility/dependency-control.js apply src/scene_composer_extra/package.json utility/version-override.json
+      - name: Update Vite Project Dependency
+        run: |
+          node utility/dependency-control.js apply examples/${TARGET_LIBRARY}/package.json utility/version-override.json
+        env:
+          TARGET_LIBRARY: typescript-vite-simple
+      - name: Update Create React App Project Dependency
+        run: |
+          node utility/dependency-control.js apply examples/${TARGET_LIBRARY}/package.json utility/version-override.json
+        env:
+          TARGET_LIBRARY: typescript-simple
+      - name: commit project
+        run: |
+          git remote set-url origin https://github-actions:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
+          git config --global user.name update_scene_composer
+          git config --global user.email update_scene_composer@system.com
+          git add .
+          git commit -m "@iot-appkit version update : ${LIBRARY_VERSION}"
+          git push origin
+        env:
+          LIBRARY_VERSION: ${{ inputs.iot_appkit_version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
