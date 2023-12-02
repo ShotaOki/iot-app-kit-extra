@@ -1,6 +1,6 @@
 {
   "name": "@iak-extra/scene-composer-extra",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Extra Libraries for IoT App Kit Scene Composer",
   "publishConfig": {
     "access": "public"
@@ -35,8 +35,8 @@
   },
   "homepage": "https://shotaoki.github.io/iot-app-kit-extra/",
   "dependencies": {
-    "@iot-app-kit/scene-composer": "^9.5.0",
-    "@iot-app-kit/source-iottwinmaker": "^9.5.0",
+    "@iot-app-kit/scene-composer": "^9.8.0",
+    "@iot-app-kit/source-iottwinmaker": "^9.8.0",
     "@react-three/drei": "^9.74.12",
     "@react-three/fiber": "^8.14.5",
     "jsx-runtime": "^1.2.0",
