@@ -1,0 +1,52 @@
+name: replace-dependency
+on:
+  workflow_dispatch:
+    inputs:
+      scene_composer_extra_version:
+        description: "@iak-extra/scene-composer-extra version"
+        required: true
+        type: string
+      update_scene_compose_extra_version:
+        description: "update @iak-extra/scene-composer-extra version"
+        required: true
+        type: boolean
+jobs:
+  update_scene_composer_extra:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    if: ${{ inputs.update_scene_compose_extra_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18.17.1"
+      - name: Zip Vite Project
+        working-directory: utility
+        run: |
+          node dependency-control.js replace version-override.json "${TARGET_LIBRARY}=${LIBRARY_VERSION}"
+        env:
+          LIBRARY_VERSION: ${{ inputs.scene_composer_extra_version }}
+          TARGET_LIBRARY: "@iak-extra/scene-composer-extra"
+      - name: Update Vite Project Dependency
+        run: |
+          node utility/dependency-control.js apply examples/${TARGET_LIBRARY}/package.json utility/version-override.json
+        env:
+          TARGET_LIBRARY: typescript-vite-simple
+      - name: Update Create React App Project Dependency
+        run: |
+          node utility/dependency-control.js apply examples/${TARGET_LIBRARY}/package.json utility/version-override.json
+        env:
+          TARGET_LIBRARY: typescript-simple
+      - name: commit project
+        run: |
+          git remote set-url origin https://github-actions:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
+          git config --global user.name PackageCurrentTemplate
+          git config --global user.email PackageCurrentTemplate@system.com
+          git add .
+          git commit -m "commit from github actions package_current_template"
+          git push origin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
