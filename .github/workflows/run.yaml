@@ -2,14 +2,28 @@ name: update-test-modules
 on: [workflow_dispatch]
 jobs:
   package_current_template:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Zip Vite Project
-        working-directory: templates
+        working-directory: examples
         run: |
-          zip typescript-vite-simple-test.zip -r ../examples/typescript-vite-simple
+          [ -e ../templates/${TARGET_FILE}.zip ] || rm ../templates/${TARGET_FILE}.zip
+          zip ../templates/${TARGET_FILE}.zip -r ${TARGET_PROJECT}/
+        env:
+          TARGET_FILE: typescript-vite-simple
+          TARGET_PROJECT: typescript-vite-simple
+      - name: Zip Create React App Project
+        working-directory: examples
+        run: |
+          [ -e ../templates/${TARGET_FILE}.zip ] || rm ../templates/${TARGET_FILE}.zip
+          zip ../templates/${TARGET_FILE}.zip -r ${TARGET_PROJECT}/
+        env:
+          TARGET_FILE: typescript-simple-react18
+          TARGET_PROJECT: typescript-simple
       - name: Push archives
         run: |
           git remote set-url origin https://github-actions:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
