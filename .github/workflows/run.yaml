@@ -1,28 +1,22 @@
 name: update-test-modules
 on: [workflow_dispatch]
 jobs:
-  update-test-module:
+  package_current_template:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18.17.1"
-      - name: Build package
-        working-directory: src/scene_composer_extra
+      - name: Zip Vite Project
+        working-directory: templates
         run: |
-          npm install --legacy-peer-deps
-          npm run build:wsl
-      - name: Build modules
-        working-directory: src/scene_composer_extra
+          zip typescript-vite-simple-test.zip -r ../examples/typescript-vite-simple
+      - name: Push archives
         run: |
-          npm install --legacy-peer-deps
-          npm run build:wsl
-      - name: Dependency to current repository
-        working-directory: examples/typescript-simple
-        run: |
-          sed -i 's/"@iak-extra\/scene-composer-extra.*$/"@iak-extra\/scene-composer-extra": "file:..\/..\/package\/scene_composer_extra",/g' package.json
-          npm install --legacy-peer-deps
-          npm run build
+          git remote set-url origin https://github-actions:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
+          git config --global user.name PackageCurrentTemplate
+          git config --global user.email PackageCurrentTemplate@system.com
+          git add .
+          git commit -m "commit from github actions package_current_template"
+          git push origin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
