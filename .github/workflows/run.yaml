@@ -9,9 +9,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Zip Vite Project
-        working-directory: templates
+        working-directory: examples
         run: |
-          zip typescript-vite-simple-test.zip -r ../examples/typescript-vite-simple/
+          zip ../templates/typescript-vite-simple-test.zip -r typescript-vite-simple/
       - name: Push archives
         run: |
           git remote set-url origin https://github-actions:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
