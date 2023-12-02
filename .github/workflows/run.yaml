@@ -11,11 +11,19 @@ jobs:
       - name: Zip Vite Project
         working-directory: examples
         run: |
-          [ -e ../templates/${TARGET_FILE}.zip ] && rm ../templates/${TARGET_FILE}.zip
+          [ -e ../templates/${TARGET_FILE}.zip ] || rm ../templates/${TARGET_FILE}.zip
           zip ../templates/${TARGET_FILE}.zip -r ${TARGET_PROJECT}/
         env:
-          TARGET_FILE: typescript-vite-simple-test
+          TARGET_FILE: typescript-vite-simple
           TARGET_PROJECT: typescript-vite-simple
+      - name: Zip Create React App Project
+        working-directory: examples
+        run: |
+          [ -e ../templates/${TARGET_FILE}.zip ] || rm ../templates/${TARGET_FILE}.zip
+          zip ../templates/${TARGET_FILE}.zip -r ${TARGET_PROJECT}/
+        env:
+          TARGET_FILE: typescript-simple-react18
+          TARGET_PROJECT: typescript-simple
       - name: Push archives
         run: |
           git remote set-url origin https://github-actions:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
