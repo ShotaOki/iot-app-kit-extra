@@ -35,7 +35,7 @@ async function apply_main() {
 }
 
 // packageファイルの依存関係を、引数2の文字列に変換する
-async function replacement_main() {
+async function replacement_main(process_type, process_key) {
   // 更新対象のpackage
   const raw = await fs.readFile(from_json, "utf8");
   // 引数2の文字列
@@ -45,12 +45,19 @@ async function replacement_main() {
   const data = JSON.parse(raw);
 
   // 依存関係を更新する
-  const replacement = data["dependencies"];
-  Object.keys(replacement).forEach((replacement_key) => {
-    if (replacement_key == input_key) {
-      data["dependencies"][replacement_key] = input_arg;
-    }
-  });
+  if (process_type == "replace") {
+    const replacement = data[process_key];
+    Object.keys(replacement).forEach((replacement_key) => {
+      if (replacement_key == input_key) {
+        data[process_key][replacement_key] = input_arg;
+      }
+    });
+  }
+  // メタ情報を追記する
+  if (process_type == "append") {
+    data[process_key] = data[process_key] || {};
+    data[process_key][input_key] = input_arg;
+  }
 
   // ファイルを出力する
   fs.writeFile(from_json, JSON.stringify(data, undefined, 2), "utf8");
@@ -60,5 +67,8 @@ if (proc_name == "apply") {
   apply_main().then(() => {});
 }
 if (proc_name == "replace") {
-  replacement_main().then(() => {});
+  replacement_main("replace", "dependencies").then(() => {});
+}
+if (proc_name == "append") {
+  replacement_main("append", "@meta").then(() => {});
 }
