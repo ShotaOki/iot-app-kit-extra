@@ -232,7 +232,11 @@ export function MixinMouseInput<TBase extends Constructor>(Base: TBase) {
       const canvasList = document.querySelectorAll("canvas");
       for (const index in canvasList) {
         const item = canvasList[index];
-        if (item.dataset.engine && item.dataset.engine.startsWith("three.js")) {
+        if (
+          item.dataset &&
+          item.dataset.engine &&
+          item.dataset.engine.startsWith("three.js")
+        ) {
           return item;
         }
       }
