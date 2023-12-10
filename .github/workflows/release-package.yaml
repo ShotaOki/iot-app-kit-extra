@@ -32,6 +32,7 @@ jobs:
           git config --global user.email update_scene_composer_extra@system.com
           git add .
           git commit -m "@iak-extra/scene-composer-extra set package version : ${LIBRARY_VERSION}"
+          git push origin
           git tag "release/${LIBRARY_VERSION}"
           git push origin "release/${LIBRARY_VERSION}"
         env:
