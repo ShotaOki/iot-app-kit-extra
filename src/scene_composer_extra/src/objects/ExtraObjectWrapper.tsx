@@ -1,5 +1,5 @@
 import { IAnchorComponent } from "@iot-app-kit/scene-composer";
-import { Vector3, Euler, Scene, Object3D } from "three/src/Three";
+import { Vector3, Euler, Scene, Object3D, Raycaster } from "three/src/Three";
 import { AnimationParameter, SystemLoadingStatus } from "../types/DataType";
 import { degToRad } from "three/src/math/MathUtils";
 import { isBillboardMixinObject } from "../mixin/MixinBillboard";
@@ -87,6 +87,8 @@ export interface ExtraObjectInterface
   stateChange(newState: string | number): void;
   /** create完了通知関数 */
   awake(): void;
+  /** 画面操作の許可 */
+  allowControlFromOtherLibrary(raycaster: Raycaster | undefined): boolean;
 }
 
 // クラスに取り込むミックスインを指定する
@@ -330,6 +332,11 @@ export class ExtraObjectWrapper
         rootScene: this._rootScene,
       }
     );
+  }
+
+  /** 画面操作の許可: true -> 別のライブラリ(Matterport)の操作を許可する */
+  allowControlFromOtherLibrary(raycaster: Raycaster | undefined) {
+    return true;
   }
 
   /** effectDependsOnで設定した依存先が更新された */

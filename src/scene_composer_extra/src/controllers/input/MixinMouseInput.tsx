@@ -2,6 +2,7 @@ import { Raycaster, Vector2 } from "three/src/Three";
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { HTMLModelWrapper } from "../../objects/html/HTMLModelWrapper";
 import { Constructor } from "../../mixin/MixinBase";
+import { MouseEventInterceptor } from "./MouseEventInterceptor";
 
 // イベント名を定義する
 const EVENT_POINTER_MOVE = "pointermove";
@@ -216,6 +217,8 @@ export function MixinMouseInput<TBase extends Constructor>(Base: TBase) {
     #_windowLeft: number = 0;
     // CSS3DRenderer
     #_css3DRenderer?: CSS3DRenderer;
+    // クリック操作の割り込み取得
+    #_eventInterceptor?: MouseEventInterceptor;
 
     /** Mixinを初期化する */
     initiate() {
@@ -227,15 +230,39 @@ export function MixinMouseInput<TBase extends Constructor>(Base: TBase) {
       this.#_css3DRenderer = new CSS3DRenderer();
     }
 
-    /** クリックさせるベースのエレメントを取得する */
-    #baseElement(): HTMLCanvasElement | undefined {
-      const canvasList = document.querySelectorAll("canvas");
+    /** Three.jsのCanvasを画面から参照する */
+    #searchThreeJsCanvas(
+      parent: ParentNode,
+      key: string
+    ): HTMLCanvasElement | undefined {
+      const canvasList = parent.querySelectorAll("canvas");
       for (const index in canvasList) {
         const item = canvasList[index];
-        if (item.dataset.engine && item.dataset.engine.startsWith("three.js")) {
+        if (
+          item.dataset &&
+          item.dataset.engine &&
+          item.dataset.engine.startsWith(key)
+        ) {
           return item;
         }
       }
+      return undefined;
+    }
+
+    /** クリックさせるベースのエレメントを取得する */
+    #baseElement(): HTMLCanvasElement | undefined {
+      // ルート直下にあるCanvasを取得する
+      const canvasItem = this.#searchThreeJsCanvas(document, "three.js");
+      if (canvasItem) {
+        return canvasItem;
+      }
+      // MatterportViewerの下にあるCanvasを取得する
+      const innerDocument =
+        document.querySelector("matterport-viewer")?.shadowRoot;
+      if (innerDocument) {
+        return this.#searchThreeJsCanvas(innerDocument, "three.js");
+      }
+      // いずれもないのなら、undefinedを返す
       return undefined;
     }
 
@@ -255,6 +282,14 @@ export function MixinMouseInput<TBase extends Constructor>(Base: TBase) {
           0,
           0
         );
+      }
+      // MatterportViewerがあるなら、操作の割り込みコントローラを作成する
+      if (this.#_eventInterceptor === undefined) {
+        if (document.querySelector("matterport-viewer")) {
+          this.#_eventInterceptor = new MouseEventInterceptor(
+            "matterport-viewer"
+          );
+        }
       }
       // 画面サイズを取得する
       const rect = item.getBoundingClientRect();
@@ -277,12 +312,26 @@ export function MixinMouseInput<TBase extends Constructor>(Base: TBase) {
           contentRect.top,
           contentRect.left
         );
+        // キャンバスサイズを割り込みコントローラに同期する
+        this.#_eventInterceptor?.sync({
+          top: contentRect.top,
+          left: contentRect.left,
+          width: contentRect.width,
+          height: contentRect.height,
+        });
       });
       observer.observe(item);
       this.#_windowTop = top;
       this.#_windowLeft = left;
       this.#_windowWidth = width;
       this.#_windowHeight = height;
+      // キャンバスサイズを割り込みコントローラに同期する
+      this.#_eventInterceptor?.sync({
+        top,
+        left,
+        width,
+        height,
+      });
       // CSS3 HTMLのレンダラを参照する
       return HTMLModelWrapper.initiate(css3dRendrer, width, height, top, left);
     }
@@ -301,6 +350,24 @@ export function MixinMouseInput<TBase extends Constructor>(Base: TBase) {
     }
 
     /**
+     * 別のライブラリの操作を受け付けるならtrue、拒否するならfalseを設定する
+     * @param enablePropagation 伝搬の許可
+     */
+    setEnablePropagation(enablePropagation: boolean) {
+      this.#_eventInterceptor?.setEnablePropagation(enablePropagation);
+    }
+
+    /**
+     * 他のライブラリへのタッチ操作の通知に割り込む、falseを返すと通知させない
+     * @param callback 他のライブラリのタッチ操作が実行されたハンドラ
+     */
+    onCheckIntercept(
+      callback: (x: number, y: number, enablePropagation: boolean) => boolean
+    ) {
+      this.#_eventInterceptor?.onCheckIntercept(callback);
+    }
+
+    /**
      * ループ終了時に実行
      * このループのマウスイベントの読み取り処理の終了を宣言する
      */
@@ -313,59 +380,94 @@ export function MixinMouseInput<TBase extends Constructor>(Base: TBase) {
      */
     setupPointerEvent() {
       // マウス移動時の処理
-      window.addEventListener(EVENT_POINTER_MOVE, (event) => {
-        const x = event.clientX - this.#_windowLeft;
-        const y = event.clientY - this.#_windowTop;
-        this.#_mouseEvent?.putEvent(
-          EVENT_POINTER_MOVE,
-          this.#_windowWidth,
-          this.#_windowHeight,
-          x,
-          y
-        );
-      });
-      // マウスクリック開始の処理
-      window.addEventListener(EVENT_POINTER_DOWN, (event) => {
-        const x = event.clientX - this.#_windowLeft;
-        const y = event.clientY - this.#_windowTop;
-        this.#_mouseEvent?.putEvent(
-          EVENT_POINTER_DOWN,
-          this.#_windowWidth,
-          this.#_windowHeight,
-          x,
-          y
-        );
-      });
-      // マウスクリック終了の処理
-      window.addEventListener(EVENT_POINTER_UP, () => {
-        this.#_mouseEvent?.putEvent(
-          EVENT_POINTER_UP,
-          this.#_windowWidth,
-          this.#_windowHeight
-        );
-      });
-      // タッチ開始の処理
-      window.addEventListener(EVENT_TOUCH_START, (event) => {
-        if (event.touches && event.touches.length >= 1) {
-          const x = event.touches[0].clientX - this.#_windowLeft;
-          const y = event.touches[0].clientY - this.#_windowTop;
+      window.addEventListener(
+        EVENT_POINTER_MOVE,
+        (event) => {
+          const x = event.clientX - this.#_windowLeft;
+          const y = event.clientY - this.#_windowTop;
           this.#_mouseEvent?.putEvent(
-            EVENT_TOUCH_START,
+            EVENT_POINTER_MOVE,
             this.#_windowWidth,
             this.#_windowHeight,
             x,
             y
           );
+        },
+        {
+          // 判定優先度を最も高くする
+          capture: true,
         }
-      });
+      );
+      // マウスクリック開始の処理
+      window.addEventListener(
+        EVENT_POINTER_DOWN,
+        (event) => {
+          const x = event.clientX - this.#_windowLeft;
+          const y = event.clientY - this.#_windowTop;
+          this.#_mouseEvent?.putEvent(
+            EVENT_POINTER_DOWN,
+            this.#_windowWidth,
+            this.#_windowHeight,
+            x,
+            y
+          );
+        },
+        {
+          // 判定優先度を最も高くする
+          capture: true,
+        }
+      );
+      // マウスクリック終了の処理
+      window.addEventListener(
+        EVENT_POINTER_UP,
+        () => {
+          this.#_mouseEvent?.putEvent(
+            EVENT_POINTER_UP,
+            this.#_windowWidth,
+            this.#_windowHeight
+          );
+        },
+        {
+          // 判定優先度を最も高くする
+          capture: true,
+        }
+      );
+      // タッチ開始の処理
+      window.addEventListener(
+        EVENT_TOUCH_START,
+        (event) => {
+          if (event.touches && event.touches.length >= 1) {
+            const x = event.touches[0].clientX - this.#_windowLeft;
+            const y = event.touches[0].clientY - this.#_windowTop;
+            this.#_mouseEvent?.putEvent(
+              EVENT_TOUCH_START,
+              this.#_windowWidth,
+              this.#_windowHeight,
+              x,
+              y
+            );
+          }
+        },
+        {
+          // 判定優先度を最も高くする
+          capture: true,
+        }
+      );
       // タッチ終了の処理
-      window.addEventListener(EVENT_TOUCH_END, () => {
-        this.#_mouseEvent?.putEvent(
-          EVENT_TOUCH_END,
-          this.#_windowWidth,
-          this.#_windowHeight
-        );
-      });
+      window.addEventListener(
+        EVENT_TOUCH_END,
+        () => {
+          this.#_mouseEvent?.putEvent(
+            EVENT_TOUCH_END,
+            this.#_windowWidth,
+            this.#_windowHeight
+          );
+        },
+        {
+          // 判定優先度を最も高くする
+          capture: true,
+        }
+      );
     }
   };
 }

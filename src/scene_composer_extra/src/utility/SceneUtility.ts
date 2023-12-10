@@ -1,6 +1,7 @@
 import { Object3D, Event, Scene } from "three/src/Three";
 import { RootState } from "@react-three/fiber";
 import { useStore } from "@iot-app-kit/scene-composer/dist/src/store";
+import useMatterportViewer from "@iot-app-kit/scene-composer/dist/src/hooks/useMatterportViewer";
 import {
   SceneController,
   SceneControllerState,
@@ -27,7 +28,18 @@ export function findRootScene(target: Object3D<Event> | undefined) {
  */
 export function getState(rootScene: Scene): RootState {
   const d3fScene: any = rootScene;
-  return d3fScene.__r3f.root.getState() as RootState;
+  // 直下がr3fを持っている＝Matterportを利用していない場合なら、そのオブジェクトを返す
+  if (d3fScene.__r3f) {
+    return d3fScene.__r3f.root.getState() as RootState;
+  }
+  // Matterportを利用すると子要素がr3fの情報を持つため、子要素から返す
+  const states: RootState[] = d3fScene.children
+    .filter((child: any) => child.__r3f && child.__r3f.root)
+    .map((child: any) => child.__r3f.root.getState() as RootState);
+  if (states.length >= 1) {
+    return states[0];
+  }
+  throw new Error("Undefined R3F RootState");
 }
 
 /**
@@ -102,9 +114,19 @@ export function useSceneController(
     [composerId, getObject3DBySceneNodeRef]
   );
 
+  /** MatterportViewerを有効にするのなら、処理の一部を変更する */
+  const { enableMatterportViewer } = useMatterportViewer();
+
   useEffect(() => {
     /** 500msごとに状態を監視する */
     const timer = setInterval(() => {
+      // もしMatterportViewerの読み込みフラグが立っているのなら
+      if (enableMatterportViewer) {
+        // MatterportViewerのタグを検証する
+        if (!document.querySelector("matterport-viewer")) {
+          return;
+        }
+      }
       /** 500msごとに状態を更新する */
       setInitializedFlag(
         controller.exec(initializedFlag, nodeMap, getObject3DBySceneNodeRef)
@@ -126,6 +148,7 @@ export function useSceneController(
     controller,
     dataInput,
     dataBindingTemplate,
+    enableMatterportViewer,
     getSceneRuleMapById,
   ]);
 
