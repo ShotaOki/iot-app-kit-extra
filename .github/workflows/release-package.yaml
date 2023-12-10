@@ -1,0 +1,40 @@
+name: release-package
+on:
+  workflow_dispatch:
+    inputs:
+      scene_composer_extra_version:
+        description: "new publish version"
+        required: true
+        type: string
+
+jobs:
+  update_version:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    if: ${{ inputs.update_scene_compose_extra_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18.17.1"
+      - name: Rewrite Version
+        working-directory: utility
+        run: |
+          node dependency-control.js version ../src/scene_composer_extra/package.json ${LIBRARY_VERSION}
+        env:
+          LIBRARY_VERSION: ${{ inputs.scene_composer_extra_version }}
+      - name: commit project
+        run: |
+          git remote set-url origin https://github-actions:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
+          git config --global user.name update_scene_composer_extra
+          git config --global user.email update_scene_composer_extra@system.com
+          git add .
+          git commit -m "@iak-extra/scene-composer-extra set package version : ${LIBRARY_VERSION}"
+          git tag "release/${LIBRARY_VERSION}"
+          git push origin "release/${LIBRARY_VERSION}"
+        env:
+          LIBRARY_VERSION: ${{ inputs.scene_composer_extra_version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

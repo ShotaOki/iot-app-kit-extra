@@ -63,6 +63,31 @@ async function replacement_main(process_type, process_key) {
   fs.writeFile(from_json, JSON.stringify(data, undefined, 2), "utf8");
 }
 
+// バージョンを更新する
+async function set_version() {
+  // 更新対象のpackage
+  const raw = await fs.readFile(from_json, "utf8");
+
+  // JSON形式で読み込む
+  const data = JSON.parse(raw);
+  data["version"] = input_argment;
+
+  // ファイルを出力する
+  fs.writeFile(from_json, JSON.stringify(data, undefined, 2), "utf8");
+}
+
+// スクリプトを削除する
+async function remove_script() {
+  // 更新対象のpackage
+  const raw = await fs.readFile(from_json, "utf8");
+
+  // JSON形式で読み込む
+  const data = JSON.parse(raw);
+  data["scripts"] = {};
+
+  console.log(data);
+}
+
 if (proc_name == "apply") {
   apply_main().then(() => {});
 }
@@ -71,4 +96,10 @@ if (proc_name == "replace") {
 }
 if (proc_name == "append") {
   replacement_main("append", "@meta").then(() => {});
+}
+if (proc_name == "version") {
+  set_version().then(() => {});
+}
+if (proc_name == "remove_script") {
+  remove_script().then(() => {});
 }
