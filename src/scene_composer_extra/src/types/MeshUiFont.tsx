@@ -1,12 +1,17 @@
+import { ThreeMeshUIText } from "../objects/three-mesh-ui/vendor/ThreeMeshUiTextComponent";
+
 export interface FontDataParameter {
   // フォントデータ（JSON）パス
   fontFamily?: string;
   // フォントデータ（MSDF）パス
   fontTexture?: string;
+  // フォントデータの画像サイズ
+  fontImageSize?: number;
 }
 export class FontData {
   private _fontFamily: string;
   private _fontTexture: string;
+  private _fontImageSize: number;
   constructor(parameter: FontDataParameter) {
     const defaultDomain = "https://raw.githubusercontent.com";
     const path = "felixmariotto/three-mesh-ui/master/examples/assets";
@@ -21,6 +26,11 @@ export class FontData {
     } else {
       this._fontTexture = `${defaultDomain}/${path}/${fontName}.png`;
     }
+    if (parameter.fontImageSize) {
+      this._fontImageSize = parameter.fontImageSize;
+    } else {
+      this._fontImageSize = ThreeMeshUIText.defaultFontTextureSize();
+    }
   }
 
   get familiy(): string {
@@ -29,6 +39,10 @@ export class FontData {
 
   get texture(): string {
     return this._fontTexture;
+  }
+
+  get fontImageSize(): number {
+    return this._fontImageSize;
   }
 
   static default() {

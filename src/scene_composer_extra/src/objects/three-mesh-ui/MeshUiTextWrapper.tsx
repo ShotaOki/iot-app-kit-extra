@@ -15,6 +15,7 @@ import {
   MeshUiButtonFileContents,
   MeshUiButtonSetterEvent,
 } from "./MeshUiButtonWrapper";
+import { ThreeMeshUIText } from "./vendor/ThreeMeshUiTextComponent";
 
 export interface MeshUiButtonColor {
   backgroundColor: Color;
@@ -73,7 +74,10 @@ export class MeshUiTextWrapper extends MixinExtraObject {
     this.add(container);
 
     /** テキストを作成する */
-    const text = new ThreeMeshUI.Text({ content: parameter.content });
+    const text = new ThreeMeshUIText({
+      content: parameter.content,
+      textureSize: font.fontImageSize,
+    });
     container.add(text);
 
     this._content = text;

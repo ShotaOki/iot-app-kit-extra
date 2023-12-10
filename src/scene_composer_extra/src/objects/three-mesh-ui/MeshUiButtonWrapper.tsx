@@ -12,6 +12,7 @@ import {
   CreateEventValueParameter,
   EventParameter,
 } from "../../mixin/MixinEventNotifier";
+import { ThreeMeshUIText } from "./vendor/ThreeMeshUiTextComponent";
 
 export interface MeshUiButtonColor {
   backgroundColor: Color;
@@ -98,7 +99,9 @@ export class MeshUiButtonWrapper extends MixinExtraObject {
 
     /** コンテンツの内容に合わせてデータを設定する */
     if (typeof parameter.content === "string") {
-      this._content = new ThreeMeshUI.Text({});
+      this._content = new ThreeMeshUIText({
+        textureSize: font.fontImageSize,
+      });
       button.add(this._content);
     } else {
       this._content = button;
