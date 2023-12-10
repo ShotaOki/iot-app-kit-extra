@@ -227,19 +227,39 @@ export function MixinMouseInput<TBase extends Constructor>(Base: TBase) {
       this.#_css3DRenderer = new CSS3DRenderer();
     }
 
-    /** クリックさせるベースのエレメントを取得する */
-    #baseElement(): HTMLCanvasElement | undefined {
-      const canvasList = document.querySelectorAll("canvas");
+    /** Three.jsのCanvasを画面から参照する */
+    #searchThreeJsCanvas(
+      parent: ParentNode,
+      key: string
+    ): HTMLCanvasElement | undefined {
+      const canvasList = parent.querySelectorAll("canvas");
       for (const index in canvasList) {
         const item = canvasList[index];
         if (
           item.dataset &&
           item.dataset.engine &&
-          item.dataset.engine.startsWith("three.js")
+          item.dataset.engine.startsWith(key)
         ) {
           return item;
         }
       }
+      return undefined;
+    }
+
+    /** クリックさせるベースのエレメントを取得する */
+    #baseElement(): HTMLCanvasElement | undefined {
+      // ルート直下にあるCanvasを取得する
+      const canvasItem = this.#searchThreeJsCanvas(document, "three.js");
+      if (canvasItem) {
+        return canvasItem;
+      }
+      // MatterportViewerの下にあるCanvasを取得する
+      const innerDocument =
+        document.querySelector("matterport-viewer")?.shadowRoot;
+      if (innerDocument) {
+        return this.#searchThreeJsCanvas(innerDocument, "three.js");
+      }
+      // いずれもないのなら、undefinedを返す
       return undefined;
     }
 
