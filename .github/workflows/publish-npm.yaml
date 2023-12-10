@@ -1,0 +1,38 @@
+name: publish-npm
+on: [workflow_dispatch]
+
+jobs:
+  update_version:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18.17.1"
+          registry-url: "https://registry.npmjs.org"
+      - name: Build Project
+        working-directory: src/scene_composer_extra
+        run: |
+          npm install
+          npm run build:wsl
+      - name: Publish
+        working-directory: package/scene_composer_extra
+        run: |
+          node dependency-control.js remove_script package.json remove
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPMPUBLISHSECRET }}
+      - name: commit project
+        run: |
+          git remote set-url origin https://github-actions:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
+          git config --global user.name update_scene_composer_extra
+          git config --global user.email update_scene_composer_extra@system.com
+          git add .
+          git commit -m "product release"
+          git push origin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
