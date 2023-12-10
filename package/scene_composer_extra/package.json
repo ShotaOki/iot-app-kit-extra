@@ -1,6 +1,6 @@
 {
   "name": "@iak-extra/scene-composer-extra",
-  "version": "0.3.3",
+  "version": "0.3.5",
   "description": "Extra Libraries for IoT App Kit Scene Composer",
   "publishConfig": {
     "access": "public"
@@ -18,7 +18,13 @@
   "module": "./dist/es/index.js",
   "types": "./dist/es/index.d.ts",
   "scripts": {
-    "build": "",
+    "build": "npm run build:es && npm run build:cjs && npm run copy:config",
+    "build:wsl": "npm run build:es && npm run build:cjs && npm run copy:wslconfig",
+    "build:local": "npm run build:local:es && npm run build:local:cjs",
+    "build:es": "tsc -p ./tsconfig.json --outDir ../../package/scene_composer_extra/dist/es",
+    "build:cjs": "tsc -p ./tsconfig.json --outDir ../../package/scene_composer_extra/dist/cjs --module CommonJS",
+    "build:local:es": "tsc -p ./tsconfig.json --outDir ./dist/es",
+    "build:local:cjs": "tsc -p ./tsconfig.json --outDir ./dist/cjs --module CommonJS",
     "copy:config": "copy package.json ..\\..\\package\\scene_composer_extra\\package.json",
     "copy:wslconfig": "cp package.json ../../package/scene_composer_extra/package.json",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -35,8 +41,8 @@
   },
   "homepage": "https://shotaoki.github.io/iot-app-kit-extra/",
   "dependencies": {
-    "@iot-app-kit/scene-composer": "^9.8.0",
-    "@iot-app-kit/source-iottwinmaker": "^9.8.0",
+    "@iot-app-kit/scene-composer": "^9.11.0",
+    "@iot-app-kit/source-iottwinmaker": "^9.11.0",
     "@react-three/drei": "^9.74.12",
     "@react-three/fiber": "^8.14.5",
     "jsx-runtime": "^1.2.0",
