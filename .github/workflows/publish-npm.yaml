@@ -22,7 +22,7 @@ jobs:
       - name: Publish
         working-directory: package/scene_composer_extra
         run: |
-          node dependency-control.js remove_script package.json remove
+          node ../../utility/dependency-control.js remove_script package.json remove
           npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPMPUBLISHSECRET }}
