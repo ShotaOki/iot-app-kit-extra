@@ -12,7 +12,6 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
-    if: ${{ inputs.update_scene_compose_extra_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
