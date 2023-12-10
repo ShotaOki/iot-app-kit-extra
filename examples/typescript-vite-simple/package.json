@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@iak-extra/local-server-proxy": "^0.1.1",
-    "@iak-extra/scene-composer-extra": "^0.3.3",
+    "@iak-extra/scene-composer-extra": "^0.3.5",
     "@iot-app-kit/components": "^9.11.0",
     "@iot-app-kit/react-components": "^9.11.0",
     "@iot-app-kit/scene-composer": "^9.11.0",
