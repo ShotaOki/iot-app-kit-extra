@@ -238,6 +238,7 @@ export class MeshUiButtonWrapper extends MixinExtraObject {
     }
   }
 
+  /** タッチ操作とオブジェクトの衝突判定 */
   private raycast(raycaster: Raycaster, isSelected: boolean) {
     this._objsToTest.forEach((obj) => {
       const target: any = obj;
@@ -251,6 +252,18 @@ export class MeshUiButtonWrapper extends MixinExtraObject {
         target.setState("idle");
       }
     });
+  }
+
+  /** 画面操作の許可: true -> 別のライブラリ(Matterport)の操作を許可する */
+  allowControlFromOtherLibrary(raycaster: Raycaster | undefined) {
+    if (raycaster) {
+      for (const target of this._objsToTest) {
+        if (raycaster.intersectObject(target, true).length >= 1) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   /**

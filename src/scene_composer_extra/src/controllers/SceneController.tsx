@@ -1,4 +1,4 @@
-import { Object3D, Event, Scene } from "three/src/Three";
+import { Object3D, Event, Scene, Raycaster } from "three/src/Three";
 import { ISceneNodeInternal } from "@iot-app-kit/scene-composer/dist/src/store";
 import { findRootScene, getState } from "../utility/SceneUtility";
 import { ISceneFieldInterface } from "../types/ISceneField";
@@ -71,14 +71,39 @@ export class SceneController extends MixinMouseInput(Object) {
    */
   private onUpdateScene(current: SceneControllerState, rootScene: Scene) {
     if (current === SceneControllerState.Initialize) {
+      const that = this;
       // RendererをMMDに合わせて最適化する
       const { camera } = getState(rootScene);
       // 3Dキャンバスの表示位置を参照する
       const model = this.setupCanvas();
       // ボタン操作のイベントを設定する
       this.setupPointerEvent();
+      // イベントの占有を設定する
+      this.onCheckIntercept((x, y, enablePropagation) => {
+        // イベントを占有、他のライブラリのマウス操作を許可しない
+        const INTERCEPT = true;
+        // イベントを解放、他のライブラリのマウス操作を許可する
+        const ALLOW_CONTROL = false;
+        if (!enablePropagation) {
+          // 伝搬が無効であれば占有させる
+          return INTERCEPT;
+        }
+        // マウスの位置とカメラの角度から衝突判定を取る
+        const raycast = new Raycaster();
+        raycast.setFromCamera({ x, y }, camera);
+        // 3D上のオブジェクトに占有許可を問い合わせる
+        if (
+          Object.keys(that._objects).filter((k) => {
+            // 操作許可を出さないオブジェクトがあればtrueを返す
+            return !that._objects[k].allowControlFromOtherLibrary(raycast);
+          }).length != 0
+        ) {
+          // 占有が1つでもあればマウス操作を許可しない
+          return INTERCEPT;
+        }
+        return ALLOW_CONTROL;
+      });
       // アニメーションループを実行する
-      const that = this;
       function animate() {
         requestAnimationFrame(animate);
         model?.render(rootScene, camera);
