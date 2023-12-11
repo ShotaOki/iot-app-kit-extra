@@ -7,6 +7,14 @@
     "url": "https://raw.githubusercontent.com/ShotaOki/iot-app-kit-extra/main/templates/typescript-simple-react18.zip",
     "option": ""
   },
+  "typescript-vite-matterport": {
+    "url": "https://raw.githubusercontent.com/ShotaOki/iot-app-kit-extra/main/templates/typescript-vite-matterport.zip",
+    "option": ""
+  },
+  "matterport": {
+    "url": "https://raw.githubusercontent.com/ShotaOki/iot-app-kit-extra/main/templates/typescript-vite-matterport.zip",
+    "option": ""
+  },
   "typescript-cra-simple-legacy": {
     "url": "https://raw.githubusercontent.com/ShotaOki/iot-app-kit-extra/main/templates/typescript-simple.zip",
     "option": "--legacy-peer-deps"
