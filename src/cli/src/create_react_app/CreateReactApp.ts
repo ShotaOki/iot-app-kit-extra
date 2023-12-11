@@ -15,6 +15,8 @@ export const TEMPLATE_NAME_LIST = [
   "typescript-vite-simple", // Viteのテンプレート: AWS権限なし、TwinMakerだけを構築する
   "typescript-cra-simple", // ReactCreateAppのテンプレート: AWS権限なし、TwinMakerだけを構築する
   "typescript-cra-simple-legacy", // レガシーなReactCreateAppのテンプレート: AWS権限なし、TwinMakerだけを構築する
+  "typescript-vite-matterport", // Matterport+Viteのテンプレート: AWS権限なし、Matterportをインストールする
+  "matterport", // typescript-vite-matterportのエイリアス
 ];
 
 /** 機能: アプリを作成する */
