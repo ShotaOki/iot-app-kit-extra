@@ -48,6 +48,11 @@ jobs:
           node utility/dependency-control.js apply examples/${TARGET_LIBRARY}/package.json utility/version-override.json
         env:
           TARGET_LIBRARY: typescript-simple
+      - name: Update Matterport Project Dependency
+        run: |
+          node utility/dependency-control.js apply examples/${TARGET_LIBRARY}/package.json utility/version-override.json
+        env:
+          TARGET_LIBRARY: typescript-vite-matterport
       - name: commit project
         run: |
           git remote set-url origin https://github-actions:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
@@ -94,6 +99,11 @@ jobs:
           node utility/dependency-control.js apply examples/${TARGET_LIBRARY}/package.json utility/version-override.json
         env:
           TARGET_LIBRARY: typescript-simple
+      - name: Update Matterport Project Dependency
+        run: |
+          node utility/dependency-control.js apply examples/${TARGET_LIBRARY}/package.json utility/version-override.json
+        env:
+          TARGET_LIBRARY: typescript-vite-matterport
       - name: commit project
         run: |
           git remote set-url origin https://github-actions:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
