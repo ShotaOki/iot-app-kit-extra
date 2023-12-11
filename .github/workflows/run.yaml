@@ -11,7 +11,7 @@ jobs:
       - name: Zip Vite Project
         working-directory: examples
         run: |
-          [ -e ../templates/${TARGET_FILE}.zip ] || rm ../templates/${TARGET_FILE}.zip
+          [ ! -e ../templates/${TARGET_FILE}.zip ] || rm ../templates/${TARGET_FILE}.zip
           zip ../templates/${TARGET_FILE}.zip -r ${TARGET_PROJECT}/
         env:
           TARGET_FILE: typescript-vite-simple
@@ -19,7 +19,7 @@ jobs:
       - name: Zip Create React App Project
         working-directory: examples
         run: |
-          [ -e ../templates/${TARGET_FILE}.zip ] || rm ../templates/${TARGET_FILE}.zip
+          [ ! -e ../templates/${TARGET_FILE}.zip ] || rm ../templates/${TARGET_FILE}.zip
           zip ../templates/${TARGET_FILE}.zip -r ${TARGET_PROJECT}/
         env:
           TARGET_FILE: typescript-simple-react18
@@ -27,7 +27,7 @@ jobs:
       - name: Zip Create Matterport Project
         working-directory: examples
         run: |
-          [ -e ../templates/${TARGET_FILE}.zip ] || rm ../templates/${TARGET_FILE}.zip
+          [ ! -e ../templates/${TARGET_FILE}.zip ] || rm ../templates/${TARGET_FILE}.zip
           zip ../templates/${TARGET_FILE}.zip -r ${TARGET_PROJECT}/
         env:
           TARGET_FILE: typescript-vite-matterport
