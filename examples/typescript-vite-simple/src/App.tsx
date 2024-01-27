@@ -40,7 +40,7 @@ function App() {
           scale: 0.08,
           pmxPath: "/example/miku_v2.pmd",
           useMotionList: {
-            dance: "/example/wavefile_v2.vmd",
+            dance: "/example/wavefile_V2.vmd",
           },
         })
         // eslint-disable-next-line @typescript-eslint/no-unused-vars

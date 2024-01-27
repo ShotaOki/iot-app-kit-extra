@@ -19,7 +19,7 @@ const downloadList = [
   },
   {
     url: "https://threejs.org/examples/models/mmd/vmds/wavefile_v2.vmd",
-    path: "wavefile_v2.vmd",
+    path: "wavefile_V2.vmd",
   },
   {
     url: "https://pub-5e7ce27e493044a6ad7b1d927d05320c.r2.dev/studio_apartment_vray_baked_textures_included.glb",
