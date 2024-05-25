@@ -1,6 +1,12 @@
 import { Object3D, Event, Scene } from "three/src/Three";
 import { RootState } from "@react-three/fiber";
-import { useStore } from "@iot-app-kit/scene-composer/dist/src/store";
+import {
+  useSceneDocument,
+  useDataStore,
+  useViewOptionState,
+  editorStateSelector,
+  useEditorState,
+} from "@iot-app-kit/scene-composer/dist/src/store";
 import useMatterportViewer from "@iot-app-kit/scene-composer/dist/src/hooks/useMatterportViewer";
 import {
   SceneController,
@@ -10,6 +16,7 @@ import { useState, useEffect, useMemo } from "react";
 import { ReplaceContext } from "../controllers/TagController";
 import { generateUUID } from "three/src/math/MathUtils";
 import { OverrideTagsParameter } from "../types/DataType";
+import { useSceneComposerApi } from "@iot-app-kit/scene-composer";
 
 /** ルートシーンを取得する */
 export function findRootScene(target: Object3D<Event> | undefined) {
@@ -99,15 +106,13 @@ export function useSceneController(
   );
 
   // TwinMaker（クラウド側）の画面構成情報を参照する(※nodeMap＝S3にあるJsonデータのこと)
-  const nodeMap = useStore(composerId)((state) => state.document.nodeMap);
+  const sceneDocument = useSceneDocument(composerId);
   // Jsonのタグ情報に紐づいた3Dオブジェクトを参照する
-  const getObject3DBySceneNodeRef = useStore(composerId)(
-    (state) => state.getObject3DBySceneNodeRef
-  );
+  const { dataInput, dataBindingTemplate } = useDataStore(composerId);
+  // エディタを参照する
+  const { getObject3DBySceneNodeRef } = useEditorState(composerId);
   // データ参照変数を取る
-  const { dataInput, dataBindingTemplate, getSceneRuleMapById } = useStore(
-    composerId
-  )((state) => state);
+  const { getSceneRuleMapById } = useSceneDocument(composerId);
   /** コントローラを作成する */
   const controller = useMemo(
     () => factory(composerId, new ReplaceContext(getObject3DBySceneNodeRef)),
@@ -129,7 +134,11 @@ export function useSceneController(
       }
       /** 500msごとに状態を更新する */
       setInitializedFlag(
-        controller.exec(initializedFlag, nodeMap, getObject3DBySceneNodeRef)
+        controller.exec(
+          initializedFlag,
+          sceneDocument.document.nodeMap,
+          getObject3DBySceneNodeRef
+        )
       );
       controller.execData(
         dataInput,
@@ -142,7 +151,7 @@ export function useSceneController(
       clearInterval(timer);
     };
   }, [
-    nodeMap,
+    sceneDocument.document,
     getObject3DBySceneNodeRef,
     initializedFlag,
     controller,
