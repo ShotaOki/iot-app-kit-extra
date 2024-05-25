@@ -3,8 +3,9 @@ import {
   KnownSceneProperty,
 } from "@iot-app-kit/scene-composer";
 import {
-  useStore,
+  useSceneDocument,
   useViewOptionState,
+  accessStore,
 } from "@iot-app-kit/scene-composer/dist/src/store";
 import { SceneLoader } from "@iot-app-kit/source-iottwinmaker/dist/es/types";
 import { useEffect } from "react";
@@ -54,10 +55,12 @@ export class DirectSceneLoader implements SceneLoader {
         const { setConnectionNameForMatterportViewer } =
           useViewOptionState(sceneComposerId);
         // グローバルに設定されたModelIDを参照する
-        const currentStore = useStore(sceneComposerId);
-        const matterportModelId = currentStore((state) =>
-          state.getSceneProperty(KnownSceneProperty.MatterportModelId)
+        const { getSceneProperty } = useSceneDocument(sceneComposerId);
+        const matterportModelId = getSceneProperty(
+          KnownSceneProperty.MatterportModelId
         );
+        // ストアを参照する
+        const currentStore = accessStore(sceneComposerId);
         useEffect(() => {
           // Matterportのコネクション名を設定する
           // コネクション名が設定されるとextraLibraryのMatterportの接続情報が読み込まれる
