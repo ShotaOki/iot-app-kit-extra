@@ -18,6 +18,10 @@ const downloadList = [
     path: "miku_v2.pmd",
   },
   {
+    url: "https://threejs.org/examples/models/mmd/miku/eyeM2.bmp",
+    path: "eyeM2.bmp",
+  },
+  {
     url: "https://threejs.org/examples/models/mmd/vmds/wavefile_v2.vmd",
     path: "wavefile_V2.vmd",
   },
