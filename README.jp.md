@@ -164,6 +164,11 @@ https://github.com/ShotaOki/iot-app-kit-extra-document
 
 https://shotaoki.github.io/iot-app-kit-extra/
 
+## 注意
+
+iot-app-kitとプロジェクトに設定されたcloudscape-designのバージョンが不一致になると、背景色が未定義（白色）になります  
+バージョンの更新をしたときは、バージョン確認しながら合わせるようにしてください
+
 ## パブリッシュ
 
 以下のコマンドで、ライブラリをビルドします。
