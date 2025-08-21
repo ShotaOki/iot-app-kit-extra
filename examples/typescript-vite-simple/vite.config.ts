@@ -10,6 +10,11 @@ export default defineConfig((mode) => {
   const config: UserConfigExport = {
     build: {
       outDir: "build",
+      rollupOptions: {
+        external: [
+          'usehooks-ts',
+        ]
+      },
     },
     base: VITE_PROJECT_DEPLOYMENT_ROOT,
     assetsInclude: ["**/*.hdr"],
