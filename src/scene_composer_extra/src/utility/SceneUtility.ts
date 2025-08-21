@@ -6,8 +6,8 @@ import {
   useViewOptionState,
   editorStateSelector,
   useEditorState,
-} from "@iot-app-kit/scene-composer/dist/src/store";
-import useMatterportViewer from "@iot-app-kit/scene-composer/dist/src/hooks/useMatterportViewer";
+} from "@iot-app-kit/scene-composer/dist/esm/src/store";
+import useMatterportViewer from "@iot-app-kit/scene-composer/dist/esm/src/hooks/useMatterportViewer";
 import {
   SceneController,
   SceneControllerState,

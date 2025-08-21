@@ -2,7 +2,7 @@ import {
   IAnchorComponent,
   KnownComponentType,
 } from "@iot-app-kit/scene-composer";
-import { ISceneNodeInternal } from "@iot-app-kit/scene-composer/dist/src/store";
+import { ISceneNodeInternal } from "@iot-app-kit/scene-composer/dist/esm/src/store";
 import { SearchTagsCallback } from "../types/DataType";
 import { Object3D, Event, Scene } from "three/src/Three";
 import { ReplaceTagBase } from "./tags/ReplaceTagBase";

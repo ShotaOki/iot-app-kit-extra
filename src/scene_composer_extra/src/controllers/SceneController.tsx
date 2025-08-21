@@ -1,5 +1,5 @@
-import { Object3D, Event, Scene, Raycaster } from "three/src/Three";
-import { ISceneNodeInternal } from "@iot-app-kit/scene-composer/dist/src/store";
+import { Object3D, Event, Scene, Raycaster, Vector2 } from "three/src/Three";
+import { ISceneNodeInternal } from "@iot-app-kit/scene-composer/dist/esm/src/store";
 import { findRootScene, getState } from "../utility/SceneUtility";
 import { ISceneFieldInterface } from "../types/ISceneField";
 import { ExtraObjectInterface } from "../objects/ExtraObjectWrapper";
@@ -11,7 +11,7 @@ import {
 import {
   dataBindingValuesProvider,
   ruleEvaluator,
-} from "@iot-app-kit/scene-composer/dist/src/utils/dataBindingUtils";
+} from "@iot-app-kit/scene-composer/dist/esm/src/utils/dataBindingUtils";
 import { ReplaceContext, searchTag } from "./TagController";
 import { SystemLoadingStatus } from "../types/DataType";
 import ThreeMeshUI from "three-mesh-ui";
@@ -90,7 +90,7 @@ export class SceneController extends MixinMouseInput(Object) {
         }
         // マウスの位置とカメラの角度から衝突判定を取る
         const raycast = new Raycaster();
-        raycast.setFromCamera({ x, y }, camera);
+        raycast.setFromCamera(new Vector2(x, y), camera);
         // 3D上のオブジェクトに占有許可を問い合わせる
         if (
           Object.keys(that._objects).filter((k) => {

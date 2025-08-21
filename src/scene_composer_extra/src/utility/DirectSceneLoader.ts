@@ -6,8 +6,8 @@ import {
   useSceneDocument,
   useViewOptionState,
   accessStore,
-} from "@iot-app-kit/scene-composer/dist/src/store";
-import { SceneLoader } from "@iot-app-kit/source-iottwinmaker/dist/es/types";
+} from "@iot-app-kit/scene-composer/dist/esm/src/store/Store";
+import { SceneLoader } from "@iot-app-kit/source-iottwinmaker/dist/esm/types";
 import { useEffect } from "react";
 
 /**

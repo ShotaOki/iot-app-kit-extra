@@ -9,6 +9,7 @@ import {
   MeshBasicMaterial,
   PlaneGeometry,
   Object3D,
+  BufferAttribute,
 } from "three/src/Three";
 import ThreeMeshUI from "three-mesh-ui";
 import { AnimationParameter } from "../../types/DataType";
@@ -67,15 +68,15 @@ export class MeshUiLoadingWrapper extends MixinExtraObject {
     /** ローディング中の円を表示する */
     let colorAttributes = [];
     for (let i = 0; i < geometry.attributes.position.count; i++) {
-      const uvY = geometry.attributes.uv.getY(i);
-      const uvX = geometry.attributes.uv.getX(i);
+      const uvY = (geometry.attributes.uv as BufferAttribute).getY(i);
+      const uvX = (geometry.attributes.uv as BufferAttribute).getX(i);
       // グラデーションカラーを取得
       const color = backgroundColor.clone().lerp(gradientEnd, uvX);
       colorAttributes.push(color.r, color.g, color.b);
       // 長方形を円に変換する
       // 長方形の下側を円の内側、上側を円の外側とする
       const radius = circleRadius + circleLineWidth * uvY;
-      geometry.attributes.position.setXY(
+      (geometry.attributes.position as BufferAttribute).setXY(
         i,
         Math.cos(Math.PI * 2 * (1.0 - uvX)) * radius,
         Math.sin(Math.PI * 2 * (1.0 - uvX)) * radius
